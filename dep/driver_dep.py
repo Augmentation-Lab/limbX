@@ -1,19 +1,25 @@
-# Imports & Classes
+"""
+DRIVER SCRIPT
+executes control system
+"""
+
+# IMPORTS & CLASSES
 
 import RPi.GPIO as GPIO
 from time import sleep
-from collections import default dict
+from collections import defaultdict
+from servo import *
 
 class Params():
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
         
-# Globals
+# GLOBALS
 
 updateInterval = 0.1
 numSegments = 1
 
-# Initialization
+# INITIALIZATION
 
 GPIO.setmode(GPIO.BOARD)
 lrServoPin = 12
@@ -24,7 +30,7 @@ GPIO.setup(lrServoPin, GPIO.OUT)
 pwm = GPIO.PWM(lrServoPin, 50)
 pwm.start(0)
 
-def pausePWM():
+def pausePWM(servo):
     GPIO.output(servo, False)
     pwm.ChangeDutyCycle(0)
 
@@ -40,7 +46,7 @@ def testStart():
     sleep(1)
     SetAngle(lrServoPin, 0)
     
-# Control System
+# CONTROL SYSTEM
 
 state = Params()
 
@@ -48,13 +54,12 @@ def update():
     # updates the global state every updateInterval seconds
     state.currentPosition = getCurrentPosition()
     sleep(updateInterval)
-        
-segmentMap = defaultdict()
-segmentMap[1] =
 
-# def getCurrentPosition():
-#     # methods to get current position? IMU data?
-#     return currentPosition
+# not-used
+def getCurrentPosition():
+    # methods to get current position? IMU data?
+    currentPosition = 0
+    return currentPosition
     
 def calculateControls(target):
     # calculate control sequence necessary to move grabber to target
@@ -62,7 +67,10 @@ def calculateControls(target):
     return controlSequence
 
 def controlSegment(segment, target):
-    
+    pass
+
+segmentMap = defaultdict()
+segmentMap[1] = {}
 
 pwm.stop()
 GPIO.cleanup()
