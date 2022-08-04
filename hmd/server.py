@@ -1,3 +1,8 @@
+"""
+SERVER SCRIPT
+sends data to limb/client
+"""
+
 #!/usr/bin/env python3
 
 from bluedot.btcomm import BluetoothServer
