@@ -5,7 +5,8 @@
 limbX
 ├── README.md
 ├── demo.py - demonstrates limb functionality
-├── dep (hidden) - archived scripts
+├── archived (hidden) - archived scripts
+├── data - stores camera data from hmd RPi
 ├── hmd
 │   ├── driver.py - integrates /limb scripts to send commands (master)
 │   ├── server.py - sends data to /limb/client
