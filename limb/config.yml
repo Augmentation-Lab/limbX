@@ -1,0 +1,22 @@
+"""
+CONFIG FILE
+specifies configuration of tentacle
+"""
+
+# PROPERTIES
+
+numSegments: 3
+servoPins: {
+    1: {
+        "lr": 1,
+        "ud": 2
+    },
+    2: {
+        "lr": 3,
+        "ud": 4
+    },
+    3: {
+        "lr": 5,
+        "ud": 6
+    }
+}

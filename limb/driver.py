@@ -1,81 +1,86 @@
 """
 DRIVER SCRIPT
-executes control system
+integrates all scripts and executs control system
 """
 
 # IMPORTS & CLASSES
 
+from blinker import Signal
+import yaml
 from time import sleep
-import asyncio
-from collections import defaultdict
-import servo, ml
-from classes import SystemState, Params
-        
-# GLOBALS
+from classes import SystemState, Params, TargetObj, TargetPos
+import servo, smart, client,  vision, hand
 
-updateInterval = 0.1
-numSegments = 1
-servoDict = {
-    1: {
-        "lr": 1,
-        "ud": 2
-    },
-    2: {
-        "lr": 3,
-        "ud": 4
-    },
-    3: {
-        "lr": 5,
-        "ud": 6
-    }
-}
+# is this global appropriate?
+global systemSTATE
 
 # INITIALIZATION
 
-servo.intiailize(servoDict)
-servo.testStart()
-    
-# CONTROL SYSTEM
+def initialize():
 
-systemSTATE = SystemState()
+    with open("config.yml") as f:
+        configData = yaml.safe_load(f)
+        print("configData", configData)
 
-def updateSystemSTATE():
-    # updates the global state every updateInterval seconds
-    systemSTATE.handPosition = getHandPosition()
-    sleep(updateInterval)
+    systemSTATE = SystemState()
+    # get config from config.yml
+    servoPins = configData["servoPins"]
+    print("servoPins", servoPins)
+    systemSTATE.servoDict = servo.initialize(servoPins)
+    if systemSTATE.check_initialized() is False:
+        raise Exception("System not initialized.")
 
-# not-used
-def getHandPosition():
-    # methods to get current position? IMU data?
-    handPosition = {'x': 0, 'y': 0, 'z': 0}   
-    return handPosition
-    
-def calculateCtrlSeq(target):
-    # calculate control sequence necessary to move grabber to target
-    # target in the form: {'x': 0, 'y': 0, 'z': 0}
-    controlSequence = ml.calculateCtrlSeq(systemSTATE.handPosition, target)
-    return controlSequence
+def shutdown():
 
-def controlSegment(segment, target):
+    servo.shutdown(systemSTATE.servoDict)
+    # should we clean up state here?
 
-    pass
+def executeCommands(commands):
 
-def processInput(inputData):
-    # process input data to generate command
-    # inputData is compressed schema of object 
-    
-    pass
+    """
+    commands in the form:
+    [{"grab": targetObj}]
+    [{"release": targetObj}]
+    [{"move": targetRelPos}, {"release": TargetObj}]
+    [{"move": targetRelPos}, {"grab": TargetObj}]
+    """
 
-segmentMap = defaultdict()
-segmentMap[1] = {}
+    for command in commands:
+        commandType = command.keys()[0]
+        commandData = command[commandType]
 
-# MAIN
+        if commandType == "move":
+            assert isinstance(commandData, TargetPos)
+            move(commandData)
+        
+        if commandType == "release":
+            # assert isinstance(commandData, TargetObj)
+            # release(commandData)
+            release()
+        
+        if commandType == "grab":
+            # assert isinstance(commandData, TargetObj)
+            # grab(commandData)
+            grab()
 
-while True:
-    asyncio.run(updateSystemSTATE())
-    
-    # add delay?
+# all commands modular s.t. possible to directly trigger from different interfaces
 
+def move(targetRelPos):
+    targetAngles = smart.calculateTargetAngles(systemSTATE.servoDict, targetRelPos)
+    servo.batchSetAngles(targetAngles)
 
-# SHUTDOWN
-servo.shutdown()
+def release():
+    hand.release()
+
+def grab():
+    hand.grab()
+
+# def release(targetObj):
+#     hand.release(targetObj)
+
+# def grab(targetObj):
+#     hand.grab(targetObj)
+
+def resetAngles():
+    servo.setAllAngles(systemSTATE.servoDict, 0)
+
