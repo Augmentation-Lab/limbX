@@ -1,6 +1,6 @@
 """
 SERVO SCRIPT
-low level functions for servo control
+executes low level servo control
 refs: https://www.instructables.com/Servo-Motor-Control-With-Raspberry-Pi/,
 https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 """

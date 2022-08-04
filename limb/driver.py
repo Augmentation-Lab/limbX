@@ -1,6 +1,6 @@
 """
 DRIVER SCRIPT
-integrates all scripts and executs control system
+integrates /limb scripts to execute control
 """
 
 # IMPORTS & CLASSES

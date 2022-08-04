@@ -1,3 +1,8 @@
+"""
+CLIENT SCRIPT
+receives data from /hmd/server (master)
+"""
+
 #!/usr/bin/env python3
 
 from bluedot.btcomm import BluetoothClient

@@ -1,3 +1,8 @@
+"""
+VISION SCRIPT
+uses ml to process camera data
+"""
+
 from classes import TargetObj, TargetPos
 
 def get_obj_label(targetObj):

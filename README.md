@@ -1,5 +1,27 @@
 # limbX
 
+### Directory Structure
+```
+limbX
+├── README.md
+├── demo.py - demonstrates limb functionality
+├── dep (hidden) - archived scripts
+├── hmd
+│   ├── driver.py - integrates /limb scripts to send commands (master)
+│   ├── server.py - sends data to /limb/client
+│   ├── vision.py - uses ml to process camera data
+│   └── voice.py - processes audio data into speech commands
+└── limb
+    ├── config.yml - config file with hardware specifications
+    ├── driver.py - integrates /limb scripts to execute control
+    ├── classes.py - defines global classes
+    ├── client.py - receives data from /hmd/server (master)
+    ├── hand.py - controls hand
+    ├── servo.py - executes low level servo control
+    ├── smart.py - calculates control sequences
+    └── vision.py - uses ml to process camera data
+```
+
 ### Open Questions
 - Currently all state information is stored in classes.py and passed down via mmain.py- should we use globals instead?
 - Easy / automatic way to trigger release signal (e.g. grabbing coffee cup out of tentacle claw)
@@ -42,27 +64,3 @@ servoTargetAngles = {
     }
 }
 ```
-
-### Limb Components
-onRPiStart - run Python GPIO script (main.py)
-
-#### Scripts
-main.py
-objrec.py
-classes.py
-client.py
-driver.py
-ml.py
-cainectrl.py
-
-### HMD Components
-onRPiStart - run Python script (main.py)
-
-##### Scripts
-main.py
-objrec.py
-classes.py
-client.py
-driver.py
-ml.py
-cainectrl.py

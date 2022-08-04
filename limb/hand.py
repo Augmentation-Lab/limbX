@@ -1,3 +1,8 @@
+"""
+HAND SCRIPT
+controls hand
+"""
+
 def grab():
     # implement hand grab here
     pass

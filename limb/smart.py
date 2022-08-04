@@ -1,6 +1,6 @@
 """
 SMART SCRIPT
-smart algorithm that calculates optimal ctrl sequence to move the limb to a target
+calculates control sequences
 """
 
 def calculateTargetAngles(servoDict, targetRelPos):
