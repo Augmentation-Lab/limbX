@@ -2,7 +2,7 @@
 DEMO SCRIPT
 demonstrates tentacle functionality
 """
-from limb import driver
+import driver
 from time import sleep
 
 def demo(demoMoveSegments=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False):

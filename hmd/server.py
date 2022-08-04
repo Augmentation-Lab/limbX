@@ -3,6 +3,8 @@ SERVER SCRIPT
 sends data to limb/client
 """
 
+import camera
+
 #!/usr/bin/env python3
 
 from bluedot.btcomm import BluetoothServer
@@ -12,6 +14,7 @@ from signal import pause
 def data_received(data):
     print("recv - {}".format(data))
     server.send(data)
+    camera.take_photo()
 
 def client_connected():
     print("client connected")
