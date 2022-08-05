@@ -4,6 +4,7 @@ working demo of getting photo from Tobiii
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 # import vision, driver
 
 address = "192.168.71.50"
@@ -21,7 +22,9 @@ while(cap.isOpened()):
   if ret == True:
 
     # Display the resulting frame
-    cv2.imshow('Tobii Pro Glasses 2 - Live Scene',frame)
+    img = cv2.imread(frame)
+    plt.imshow(img)
+    # cv2.imshow('Tobii Pro Glasses 2 - Live Scene',frame)
     cv2.imwrite("snapshot.jpg", frame)
     break
 
