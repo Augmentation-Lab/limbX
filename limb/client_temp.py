@@ -22,10 +22,10 @@ while(cap.isOpened()):
   if ret == True:
 
     # Display the resulting frame
-    img = cv2.imread(frame)
-    plt.imshow(img)
     # cv2.imshow('Tobii Pro Glasses 2 - Live Scene',frame)
     cv2.imwrite("snapshot.jpg", frame)
+    # img = cv2.imread(frame)
+    # plt.imshow(img)
     break
 
 # When everything done, release the video capture object

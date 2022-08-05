@@ -13,9 +13,16 @@ class TargetPos():
         self.y = y
         self.z = z
 
+class GazePoint():
+    def __init__(self, x=None, y=None):
+        self.x = x
+        self.y = y
+
 class TargetObj():
-    def __init__(self, imgData=None, objLabel=None, relPos=TargetPos(), **kwargs):
+    # likely removing objLabel as part of the vision mechanism
+    def __init__(self, imgData=None, gazePoint=GazePoint(), objLabel=None, relPos=TargetPos(), **kwargs):
         self.imgData = imgData
+        self.gazePoint = gazePoint
         self.objLabel = objLabel
         self.relPos = relPos
         self.__dict__.update(kwargs)
