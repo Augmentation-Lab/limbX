@@ -1,6 +1,5 @@
 """
-CLIENT SCRIPT
-receives data from Tobii glasses
+working demo of getting photo from Tobiii
 """
 
 import cv2
