@@ -5,11 +5,11 @@ uses ml to process camera data
 
 from classes import TargetObj, TargetPos
 
-def get_obj_label(targetObj):
-    assert isinstance(targetObj, TargetObj), "targetObj must be of type TargetObj"
-    objLabel = "unknown"
-    # implement object labeling here
-    return objLabel
+# def get_obj_label(targetObj):
+#     assert isinstance(targetObj, TargetObj), "targetObj must be of type TargetObj"
+#     objLabel = "unknown"
+#     # implement object labeling here
+#     return objLabel
 
 def get_rel_pos(targetObj):
     assert isinstance(targetObj, TargetObj), "targetObj must be of type TargetObj"

@@ -7,16 +7,11 @@ limbX
 ├── demo.py - demonstrates limb functionality
 ├── archived (hidden) - archived scripts
 ├── data - stores camera data from hmd RPi
-├── hmd
-│   ├── driver.py - integrates /limb scripts to send commands (master)
-│   ├── server.py - sends data to /limb/client
-│   ├── vision.py - uses ml to process camera data
-│   └── voice.py - processes audio data into speech commands
 └── limb
     ├── config.yml - config file with hardware specifications
-    ├── driver.py - integrates /limb scripts to execute control
+    ├── driver.py - executes high-level control commands
     ├── classes.py - defines global classes
-    ├── client.py - receives data from /hmd/server (master)
+    ├── client.py - receives data from Tobii
     ├── hand.py - controls hand
     ├── servo.py - executes low level servo control
     ├── smart.py - calculates control sequences
@@ -28,6 +23,12 @@ limbX
 - Easy / automatic way to trigger release signal (e.g. grabbing coffee cup out of tentacle claw)
 - Should grab and release have targetObj data inputs to help optimize process?
 
+### Computer Vision
+1. On command triggered from glasses: send image + eye gaze from Tobii to RPi.
+2. Segment object of interest using eye gaze & image
+3. Tentacle collects images of environment at different angles.
+4. When SIFT produces a match, find the x,y,z position of the center of the object.
+5. Trigger control system to calculate and execute control sequence given targetRelPos.
 
 ### Smart Algorithm
 ```
