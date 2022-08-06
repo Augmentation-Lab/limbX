@@ -1,8 +1,6 @@
 import av
 import cv2
-import numpy as np
 from tobiiglassesctrl import TobiiGlassesController
-import matplotlib.pyplot as plt
 
 # ipv4_address = "192.168.100.10"
 ipv4_address = "192.168.71.50"
