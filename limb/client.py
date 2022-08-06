@@ -4,41 +4,54 @@ receives data from Tobii glasses
 """
 
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-# import vision, driver
-
+import av
+from tobiiglassesctrl import TobiiGlassesController
+import driver, vision
+from classes import TargetObj
 
 def capture_photo():
-    
-    address = "192.168.71.50"
-    #address = "fe80::76fe:48ff:ff00:ff00"
-    cap = cv2.VideoCapture("rtsp://%s:8554/live/scene" % address)
 
-    # Check if camera opened successfully
-    if (cap.isOpened()== False):
-        print("Error opening video stream or file")
+    ipv4_address = "192.168.71.50"
 
-    # Read until video is completed
-    while(cap.isOpened()):
-    # Capture frame-by-frame
-        ret, frame = cap.read()
-        if ret == True:
-            cv2.imwrite("snapshot.jpg", frame)
+    tobiiglasses = TobiiGlassesController(ipv4_address)
+    video = av.open("rtsp://%s:8554/live/scene" % ipv4_address, "r")
+
+    tobiiglasses.start_streaming()
+    broken = False
+    for packet in video.demux():
+        for frame in packet.decode():
+            if isinstance(frame,av.video.frame.VideoFrame):
+                #print(frame.pts)
+                img = frame.to_ndarray(format='bgr24')
+                height, width = img.shape[:2]
+                data_gp  = tobiiglasses.get_data()['gp']
+                if data_gp['ts'] > 0:
+                    cv2.circle(img,(int(data_gp['gp'][0]*width),int(data_gp['gp'][1]*height)), 60, (0,0,255), 6)
+                    # cv2.imshow('Tobii Pro Glasses 2 - Live Scene',img)
+                    cv2.imwrite("snapshot.jpg", img)
+                    print("Saved snapshot.jpg and stopped streaming.")
+                    beginCommand()
+                    broken = True
+                    break
+            if broken:
+                break
+        if broken:
             break
 
-    # When everything done, release the video capture object
-    cap.release()
+    # cv2.destroyAllWindows()
 
-    # Closes all the frames
-    cv2.destroyAllWindows()
+    tobiiglasses.stop_streaming()
+    tobiiglasses.close()
 
-
-    # on signal received
-    # which side should we do object labeling on?
-    # targetObj = TargetObj(imgData=signal["imgData"], objLabel=signal["objLabel"])
-
-    # targetObj = TargetObj(imgData=signal["imgData"])
+def begin_command():
+    """
+    commands in the form:
+    [{"grab": targetObj}]
+    [{"release": targetObj}]
+    [{"move": targetRelPos}, {"release": TargetObj}]
+    [{"move": targetRelPos}, {"grab": TargetObj}]
+    """
+    targetObj = TargetObj(imgData="snapshot.jpg") # actually just imgPath
     # targetObj.objLabel = vision.get_obj_label(targetObj)
-    # targetObj.relPos = vision.get_rel_pos(targetObj)
-    # driver.executeCommands([{"move": targetObj.relPos}])
+    targetObj.relPos = vision.get_rel_pos(targetObj)
+    driver.executeCommands([{"move": targetObj.relPos}])
