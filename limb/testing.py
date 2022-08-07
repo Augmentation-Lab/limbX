@@ -1,5 +1,5 @@
 import driver
-from .components import servo
+from utilities import servo
 from time import sleep
 
 driver.initialize()

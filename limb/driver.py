@@ -8,8 +8,8 @@ integrates /limb scripts to execute control
 # from blinker import Signal
 import yaml
 from time import sleep
-from .classes import SystemState, Params, TargetObj, TargetPos
-from .components import servo, smart, hand
+from utilities.classes import SystemState, Params, TargetObj, TargetPos
+from utilities import servo, smart, hand
 
 # INITIALIZATION
 

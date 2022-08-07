@@ -7,7 +7,7 @@ import cv2
 import av
 from tobiiglassesctrl import TobiiGlassesController
 import driver, vision
-from classes import TargetObj
+from utilities.classes import TargetObj
 
 def capture_photo():
 
