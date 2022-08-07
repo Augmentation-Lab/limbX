@@ -5,18 +5,14 @@ config file with hardware specifications
 
 # PROPERTIES
 
-numSegments: 3
+numSegments: 2
 servoPins: {
     1: {
-        "lr": 1,
-        "ud": 2
+        "lr": 12,
+        "ud": 32
     },
     2: {
-        "lr": 3,
-        "ud": 4
-    },
-    3: {
-        "lr": 5,
-        "ud": 6
-    }
+        "lr": 33,
+        "ud": 35
+    }  
 }
