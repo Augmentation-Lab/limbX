@@ -25,10 +25,17 @@ limbX
 
 ### Computer Vision
 1. On command triggered from glasses: send image + eye gaze from Tobii to RPi.
-2. Segment object of interest using eye gaze & image. Label object.
-3. Tentacle collects images of environment at different angles.
-4. When SIFT produces a match, find the x,y,z position of the center of the object.
-5. Trigger control system to calculate and execute control sequence given targetRelPos.
+2. Segment image into object regions.
+3. Crop image to only include eye-tracked object without bg.
+4. Tentacle collects images of environment at different angles.
+For each image:
+5. Use SIFT to map features from cropped image to tentacle image.
+6. Segment tentacle image into object regions.
+7. Select the object region containing the most mapped points if number of mapped points exceeds threshold.
+8. Find the x,y,z position of the center of the selected object region.
+9. Average these positions as hybrid data.
+10. Trigger control system to calculate and execute control sequence given targetRelPos.
+
 
 ### Smart Algorithm
 ```
