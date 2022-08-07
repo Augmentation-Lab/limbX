@@ -4,7 +4,7 @@ human interface script that integrates wink, voice, and joystick commands
 """
 
 import client, driver
-from .utilities import vision
+from utilities import vision
 
 while True:
     button_press = True # get button press state from hardware
