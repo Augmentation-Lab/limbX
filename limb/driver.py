@@ -9,7 +9,7 @@ integrates /limb scripts to execute control
 import yaml
 from time import sleep
 from .classes import SystemState, Params, TargetObj, TargetPos
-from .components import servo, smart, hand
+from .utilities import servo, smart, hand
 
 # INITIALIZATION
 

@@ -6,7 +6,8 @@ receives data from Tobii glasses
 import cv2
 import av
 from tobiiglassesctrl import TobiiGlassesController
-import driver, vision
+import driver
+from .utilities import vision
 from classes import TargetObj
 
 def capture_photo():

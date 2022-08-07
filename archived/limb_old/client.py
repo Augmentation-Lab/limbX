@@ -6,7 +6,7 @@ receives data from Tobii glasses
 import cv2
 import av
 from tobiiglassesctrl import TobiiGlassesController
-import driver, vision
+import driver, final.vision as vision
 from classes import TargetObj
 
 def begin_command():
