@@ -28,9 +28,9 @@ int defPos[2][2] = {{135, 135}, {135, 135}};
 float absPos[2][2];
 
 // how many degrees to change the degree in moveDir frame
-int INCREMENT = 5;
+int INCREMENT = 20;
 // how long a frame is in milliseconds
-float WAIT_AFTER_INCREMENT = 75;
+float WAIT_AFTER_INCREMENT = 100;
 
 // which servo group is active (i.e. the first set of servos, the second set, etc.)
 int activeServoGroup = 0;
@@ -44,6 +44,8 @@ void setup() {
   pinMode(SW, INPUT_PULLUP); 
 
   Serial.println("Initializing...");
+  lrServo.attach(servos[activeServoGroup][0]);
+  udServo.attach(servos[activeServoGroup][1]);
   reset();
 }
 
@@ -61,21 +63,27 @@ float getJoystickY() {
 
 bool getJoystickClicked() {
   bool clicked = digitalRead(SW);
-  return clicked;
+  return !clicked;
 }
 
 
 void reset() {
-  Serial.println("Resetting"); 
-  moveTo("lr", defPos[activeServoGroup][0]);
-  moveTo("ud", defPos[activeServoGroup][1]);
+  Serial.println("Resetting");
+  activeServoGroup = 0;
+  moveTo("lr", defPos[0][0]);
+  moveTo("ud", defPos[0][1]);
+  activeServoGroup = 1;
+  moveTo("lr", defPos[1][0]);
+  moveTo("ud", defPos[1][1]);
+
+  activeServoGroup = 0;
 }
 
 bool pass(){
   return true;
 }
 
-float getServoPos(char servoPair[]){
+float getServoPos(String servoPair){
   if(servoPair == "lr"){
     return absPos[activeServoGroup][0];
   } else if(servoPair == "ud"){
@@ -83,7 +91,9 @@ float getServoPos(char servoPair[]){
   }
 }
 
-void setServoPos(char servoPair[], float deg){
+void setServoPos(String servoPair, float deg){
+  Serial.println(servoPair);
+  Serial.println(deg);
   if(servoPair == "lr"){
     absPos[activeServoGroup][0] = deg;
   } else if(servoPair == "ud"){
@@ -92,18 +102,17 @@ void setServoPos(char servoPair[], float deg){
 }
 
 
-void moveTo(char servoPair[], float deg){
+void moveTo(String servoPair, float deg){
   if(servoPair == "lr"){
     lrServo.write(deg);
-    absPos[activeServoGroup][0] = deg;
   } else if(servoPair == "ud") {
     udServo.write(deg);
-    absPos[activeServoGroup][1] = deg;
   }
+  setServoPos(servoPair, deg);
   delay(servoWait);
 }
 
-void moveDir(char servoPair[], char dir[]){
+void moveDir(String servoPair, String dir){
   Servo servo;
   float currPos;
   if(servoPair == "lr"){
@@ -113,27 +122,33 @@ void moveDir(char servoPair[], char dir[]){
     servo = udServo;
     currPos = getServoPos("ud");
   }
+  int newLocation;
   if(dir == "clockwise"){
-    float newLocation = max(currPos - INCREMENT, 0);
+    newLocation = max(currPos - INCREMENT, 0);
   } else if (dir == "counterclockwise") {
-    float newLocation = min(currPos + INCREMENT, 270);
+    newLocation = min(currPos + INCREMENT, 270);
   }
   servo.write(newLocation);
   setServoPos(servoPair, newLocation);
+
   delay(WAIT_AFTER_INCREMENT);
 }
 
 void loop() {
   float xPosition = getJoystickX();
-  float yPosition = getJoystickX();
-  bool SW_state = getJoystickClicked();
-  if(joystickToggle){
+  float yPosition = getJoystickY();
+
+  bool joystickIsPressed = getJoystickClicked();
+  if(!joystickToggle){
     activeServoGroup = 0;
   } else {
     activeServoGroup = 1;
   }
 
-  if(SW_state && (lastFramePressed == 0)) {
+  lrServo.attach(servos[activeServoGroup][0]);
+  udServo.attach(servos[activeServoGroup][1]);
+
+  if(!joystickIsPressed && (lastFramePressed == 1)) {
     joystickToggle = !joystickToggle;
   }
   else if(xPosition > 256){
@@ -148,7 +163,7 @@ void loop() {
   } else {
     pass();
   }
-  lastFramePressed = !SW_state;
+  lastFramePressed = joystickIsPressed;
 
   delay(100); 
 }
