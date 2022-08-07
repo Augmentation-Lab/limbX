@@ -1,5 +1,5 @@
-from limb import driver
-from limb.components import servo
+import driver
+from .components import servo
 from time import sleep
 
 driver.initialize()
