@@ -1,4 +1,11 @@
-numSegments: 1
+"""
+CONFIG FILE
+config file with hardware specifications
+"""
+
+# PROPERTIES
+
+numSegments: 2
 servoPins: {
     1: {
         "lr": 12,

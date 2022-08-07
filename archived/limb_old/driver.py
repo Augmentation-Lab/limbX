@@ -1,24 +1,24 @@
 """
 DRIVER SCRIPT
-integrates /limb scripts to execute control
+driver script that executes high-level control commands
 """
 
 # IMPORTS & CLASSES
 
-# from blinker import Signal
+from blinker import Signal
 import yaml
 from time import sleep
-from .classes import SystemState, Params, TargetObj, TargetPos
-from .components import servo, smart, hand
+from classes import SystemState, Params, TargetObj, TargetPos
+import servo, smart, client,  vision, hand
+
+# is this global appropriate?
+global systemSTATE
 
 # INITIALIZATION
 
 def initialize():
 
-    # is this global appropriate?
-    global systemSTATE
-
-    with open("limb/config.yml") as f:
+    with open("config.yml") as f:
         configData = yaml.safe_load(f)
         print("configData", configData)
 
