@@ -17,10 +17,12 @@ for packet in video.demux():
             img = frame.to_ndarray(format='bgr24')
             height, width = img.shape[:2]
             data_gp  = tobiiglasses.get_data()['gp']
+
             if data_gp['ts'] > 0:
                 cv2.circle(img,(int(data_gp['gp'][0]*width),int(data_gp['gp'][1]*height)), 60, (0,0,255), 6)
                 # cv2.imshow('Tobii Pro Glasses 2 - Live Scene',img)
                 cv2.imwrite("snapshot.jpg", img)
+                
                 print("stopped")
                 broken = True
                 break

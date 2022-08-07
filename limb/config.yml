@@ -20,8 +20,3 @@ servoPins: {
         "ud": 6
     }
 }
-
-clawPins: {
-    "wrist": 1,
-    "gripper": 0
-}

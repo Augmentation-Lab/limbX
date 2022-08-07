@@ -25,7 +25,7 @@ limbX
 
 ### Computer Vision
 1. On command triggered from glasses: send image + eye gaze from Tobii to RPi.
-2. Segment object of interest using eye gaze & image
+2. Segment object of interest using eye gaze & image. Label object.
 3. Tentacle collects images of environment at different angles.
 4. When SIFT produces a match, find the x,y,z position of the center of the object.
 5. Trigger control system to calculate and execute control sequence given targetRelPos.

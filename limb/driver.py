@@ -84,3 +84,6 @@ def grab():
 def resetAngles():
     servo.setAllAngles(systemSTATE.servoDict, 0)
 
+def moveSegment(segment, angles):
+    servo.moveSegment(systemSTATE.servoDict, segment, angles)
+

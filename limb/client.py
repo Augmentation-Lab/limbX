@@ -9,6 +9,19 @@ from tobiiglassesctrl import TobiiGlassesController
 import driver, vision
 from classes import TargetObj
 
+def begin_command():
+    """
+    commands in the form:
+    [{"grab": targetObj}]
+    [{"release": targetObj}]
+    [{"move": targetRelPos}, {"release": TargetObj}]
+    [{"move": targetRelPos}, {"grab": TargetObj}]
+    """
+    targetObj = TargetObj(imgData="snapshot.jpg") # actually just imgPath
+    targetObj.objLabel = vision.get_obj_label(targetObj)
+    targetObj.relPos = vision.get_rel_pos(targetObj)
+    driver.executeCommands([{"move": targetObj.relPos}])
+
 def capture_photo():
 
     ipv4_address = "192.168.71.50"
@@ -42,16 +55,3 @@ def capture_photo():
 
     tobiiglasses.stop_streaming()
     tobiiglasses.close()
-
-def begin_command():
-    """
-    commands in the form:
-    [{"grab": targetObj}]
-    [{"release": targetObj}]
-    [{"move": targetRelPos}, {"release": TargetObj}]
-    [{"move": targetRelPos}, {"grab": TargetObj}]
-    """
-    targetObj = TargetObj(imgData="snapshot.jpg") # actually just imgPath
-    # targetObj.objLabel = vision.get_obj_label(targetObj)
-    targetObj.relPos = vision.get_rel_pos(targetObj)
-    driver.executeCommands([{"move": targetObj.relPos}])
