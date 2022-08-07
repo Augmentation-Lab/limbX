@@ -1,0 +1,18 @@
+"""
+CONFIG FILE
+config file with hardware specifications
+"""
+
+# PROPERTIES
+
+numSegments: 2
+servoPins: {
+    1: {
+        "lr": 12,
+        "ud": 32
+    },
+    2: {
+        "lr": 33,
+        "ud": 35
+    }  
+}
