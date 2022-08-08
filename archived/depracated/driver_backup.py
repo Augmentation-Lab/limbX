@@ -9,7 +9,7 @@ from blinker import Signal
 import yaml
 from time import sleep
 from classes import SystemState, Params, SignalTarget, TargetPos
-import servo, smart, client,  vision, hand
+import servo, smart, client,  final.vision as vision, hand
 
 # is this global appropriate?
 global systemSTATE
