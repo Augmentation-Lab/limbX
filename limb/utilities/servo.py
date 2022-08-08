@@ -5,26 +5,20 @@ refs: https://www.instructables.com/Servo-Motor-Control-With-Raspberry-Pi/,
 https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 """
 
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from time import sleep
 from collections import defaultdict
+from adafruit_servokit import ServoKit
+kit = ServoKit(channels=16)
 
 class Servo:
     def __init__(self, name, pin, minAngle=0, maxAngle=180):
         print(f"Initializing servo {name} on pin {pin}")
-        GPIO.setup(pin, GPIO.OUT)
         self.name = name
         self.pin = pin
         self.minAngle = minAngle
         self.maxAngle = maxAngle
         self.currentAngle = 0
-        self.pwm = GPIO.PWM(pin, 50) # 50 Hz
-        self.pwm.start(0)
-
-    def pausePWM(self):
-        print(f"pausePWM(servo={self.name})")
-        GPIO.output(self.pin, False)
-        self.pwm.ChangeDutyCycle(0)
 
     def setAngle(self, angle):
         print(f"setAngle(servo={self.pin}, angle={angle})")
@@ -33,20 +27,15 @@ class Servo:
             angle = self.minAngle
         elif angle > self.maxAngle:
             angle = self.maxAngle
-        duty = angle / 18 + 2
-        GPIO.output(self.pin, True)
-        self.pwm.ChangeDutyCycle(duty)
+            
         # sleep(1)
         # self.pausePWM()
+        kit.servo[self.pin].angle = angle
+        
         self.currentAngle = angle
-
-    def shutdown(self):
-        print(f"Shutting down servo {self.name} on pin {self.pin}")
-        self.pwm.stop()
 
 def initialize(servoPins):
     servoDict = defaultdict()
-    GPIO.setmode(GPIO.BOARD)
     for segment in servoPins.keys():
         servoDict[segment] = defaultdict()
         for axis in servoPins[segment].keys():
@@ -56,9 +45,7 @@ def initialize(servoPins):
     return servoDict
 
 def shutdown(servoDict):
-    for servo in servoDict.values():
-        servo.shutdown()
-    GPIO.cleanup()
+    print("shutting down...")
 
 def testStart(servoDict):
     setAllAngles(servoDict, 90)
@@ -75,10 +62,6 @@ def setAllAngles(servoDict, angle):
     for servo in servoDict.values():
         for axis in servo.values():
             axis.setAngle(angle)
-    sleep(1)
-    for servo in servoDict.values():
-        for axis in servo.values():
-            axis.pausePWM()
 
 def batchSetAngles(servoDict, batchAngles):
     """
@@ -101,7 +84,6 @@ def batchSetAngles(servoDict, batchAngles):
     for segment in batchAngles.keys():
         for axis in batchAngles[segment].keys():
             servoDict[segment][axis].setAngle(batchAngles[segment][axis])
-    sleep(1)
-    for segment in batchAngles.keys():
-        for axis in batchAngles[segment].keys():
-            servoDict[segment][axis].pausePWM()
+
+            
+    

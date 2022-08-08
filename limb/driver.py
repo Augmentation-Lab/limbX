@@ -8,8 +8,8 @@ integrates /limb scripts to execute control
 # from blinker import Signal
 import yaml
 from time import sleep
-from utilities.classes import SystemState, Params, TargetObj, TargetPos
-from utilities import servo, smart, hand
+from limb.utilities.classes import SystemState, Params, TargetObj, TargetPos
+from limb.utilities import servo, smart, hand
 
 # INITIALIZATION
 
@@ -36,7 +36,6 @@ def shutdown():
     # should we clean up state here?
 
 def executeCommands(commands):
-
     """
     commands in the form:
     [{"grab": targetObj}]

@@ -1,5 +1,5 @@
-import driver
-from utilities import servo
+from limb import driver
+from limb.utilities import servo
 from time import sleep
 
 driver.initialize()
@@ -29,11 +29,11 @@ batchAngles22 = {
     }
 }
 
-# servo.testStart(driver.systemSTATE.servoDict)
 servo.batchSetAngles(driver.systemSTATE.servoDict, batchAngles11)
 sleep(1)
 servo.batchSetAngles(driver.systemSTATE.servoDict, batchAngles12)
 sleep(1)
-servo.batchSetAngles(driver.systemSTATE.servoDict, batchAngles21)
-sleep(1)
-servo.batchSetAngles(driver.systemSTATE.servoDict, batchAngles22)
+servo.setAllAngles(driver.systemSTATE.servoDict, 10)
+
+
+driver.shutdown()
