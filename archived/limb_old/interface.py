@@ -3,7 +3,7 @@ INTERFACE SCRIPT
 human interface script that integrates wink, voice, and joystick commands
 """
 
-import client, vision, driver
+import client, final.vision as vision, driver
 
 while True:
     button_press = True # get button press state from hardware
