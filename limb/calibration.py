@@ -1,10 +1,8 @@
-# from limb import driver
-from limb.utilities import servo
-from limb import driver
-# from time import sleep
+from utilities import servo
+import driver
+from time import sleep
 from collections import defaultdict
 import yaml
-import time
 import keyboard
 
 """
@@ -86,7 +84,7 @@ def calibrate(servoDict, numSegments, calibrationDict):
         tangleIndex = 0
         for thisSangle in range(thisAngleObj.minAngle, thisAngleObj.maxAngle + 1, thisAngleObj.interval):
             thisServo.setAngle(thisSangle)
-            time.sleep(0.1)
+            sleep(0.1)
             if keyboard.is_pressed('q'):
                 thisTangle = list(thisAngleObj.tangles.keys())[tangleIndex]
                 print(f"Segment {thisAngleObj.segment}, Tangle {tangleIndex}: Sangle {thisSangle}")

@@ -4,8 +4,6 @@ calculates control sequences
 """
 from sympy import *
 
-<<<<<<< HEAD
-=======
 # Lenghts of the segments in meters
 SEG_1 = 0.8
 SEG_2 = 0.4
@@ -79,7 +77,6 @@ def getV1(targetAngles, targetRelPos):
     return targetAngles, v1
 
 
->>>>>>> e81d43f1840d09cc4e7d40f6771e3135d770a0bd
 def calculateTargetAngles(servoDict, targetRelPos):
     """
     a 3D vector describing the location to go to from the tip of the first stage
@@ -152,13 +149,6 @@ def calculateTargetAngles(servoDict, targetRelPos):
 
     return targetAngles
 
-<<<<<<< HEAD
-"""
-OUTPUTS
-radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
-dist: the distance to the center of the intersection from the center of the first sphere: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
-angles: the two angles that lead to the intersection of the two spheres
-=======
 def Calibrate():
     # iterate from 0 to 270 degrees on teh servo
     # print the current servo angle
@@ -167,7 +157,6 @@ def Calibrate():
     # servo angle: corresponding tentacle angle
     return CALIBRATE
 
->>>>>>> e81d43f1840d09cc4e7d40f6771e3135d770a0bd
 
 def getSphereIntersection(r_in, R_in, a_in, b_in, c_in, w_in):
     """

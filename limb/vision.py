@@ -26,15 +26,6 @@ import os
 import matplotlib.pyplot as plt
 
 def rectContains(rect,pt):
-    # print("rect: ", rect)
-    # print("pt[0]: ", pt[0])
-    # print("pt[1]: ", pt[1])
-    # print("rect[0]", rect[0])
-    # print("rect[1]", rect[1])
-    # print("rect[2]", rect[2])
-    # print("rect[3]", rect[3])
-    # print("first", rect[0] < pt[0] < rect[2])
-    # print("second", rect[1] < pt[1] < rect[3])
     logic = rect[0] < pt[0] and pt[0] < rect[2] and rect[1] < pt[1] and pt[1] < rect[3]
     return logic
 
