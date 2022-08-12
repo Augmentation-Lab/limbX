@@ -18,15 +18,15 @@ numSegments = 1
 servoPins = {
     1: {
         "lr": 1,
-        "ud": 2
+        "bf": 2
     },
     2: {
         "lr": 3,
-        "ud": 4
+        "bf": 4
     },
     3: {
         "lr": 5,
-        "ud": 6
+        "bf": 6
     }
 }
 
@@ -60,15 +60,15 @@ def executeCtrlSeq(ctrlSeq):
 #     servoAngles = {
 #         1: {
 #             "lr": -90,
-#             "ud": 180
+#             "bf": 180
 #         },
 #         2: {
 #             "lr": 70,
-#             "ud": 45
+#             "bf": 45
 #         },
 #         3: {
 #             "lr": 120,
-#             "ud": 60
+#             "bf": 60
 #         }
 #     }
 #     return servoAngles
