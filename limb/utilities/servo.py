@@ -21,7 +21,7 @@ class Servo:
         self.currentAngle = 0
 
     def setAngle(self, angle):
-        print(f"setAngle(servo={self.pin}, angle={angle})")
+        print(f"setAngle(servo_name={self.name}, servo_pin={self.pin}, angle={angle})")
         # check against max and min angles
         if angle < self.minAngle:
             angle = self.minAngle

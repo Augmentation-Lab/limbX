@@ -12,6 +12,8 @@ class TargetPos():
         self.x = x
         self.y = y
         self.z = z
+    def __str__(self):
+        return f"TargetPos(x={self.x}, y={self.y}, z={self.z})"
 
 class GazePoint():
     def __init__(self, x=None, y=None):
@@ -34,7 +36,7 @@ class SystemState():
         # self.currentCtrlSeq = None
         self.initialized = False
         self.__dict__.update(kwargs)
-    
+
     def check_initialized(self):
         if self.servoDict is None:
             print("System not initialized.")

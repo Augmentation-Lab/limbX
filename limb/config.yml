@@ -1,7 +1,7 @@
 numSegments: 1
 servoPins: {
     0: {
-        "central": 0,
+        "central": 15,
     },
     1: {
         "lr": 0,

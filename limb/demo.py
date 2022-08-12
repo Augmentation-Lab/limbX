@@ -6,11 +6,12 @@ import driver
 from time import sleep
 # import TargetPos
 from utilities.classes import TargetPos
+from sympy import *
 
 def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False, demoMoveTo=False):
     driver.initialize()
     if demoMoveAround:
-        moveSegments()
+        demoMoveAround()
     if demoExploreWorkspace:
         driver.resetAngles()
         # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
@@ -25,8 +26,10 @@ def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoR
         # implement later
         print("waveHello()")
     if demoMoveTo:
-        print("moveTo(target={target})")
-        driver.move(TargetPos(1,2,0))
+        # position relative ot the central servo
+        target = TargetPos(2,1,3)
+        print(f"moveTo(target={target})")
+        driver.move(target)
     driver.shutdown()
 
 # SEQUENCES
@@ -63,4 +66,4 @@ def demoMoveAround():
             driver.moveSegment(segment, anglesDict[movement])
             sleep(1)
 
-demo(demoMoveSegments=False, demoGrab=False, demoRelease=False, demoMoveTo=True)
+demo(demoMoveTo=True)
