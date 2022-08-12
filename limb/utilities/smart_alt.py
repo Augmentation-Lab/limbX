@@ -6,8 +6,7 @@ from sympy import *
 
 def calculateTargetAngles(servoDict, targetRelPos):
     """
-    a 3D vector describing the location to go to from the tip of the first stage
-    targetRelPos in the form:
+    relativeObjPos in the form:
     TargetPos(x=10,y=20,z=5)
 
     servoDict in the form:
@@ -28,12 +27,13 @@ def calculateTargetAngles(servoDict, targetRelPos):
     access angle via:
     angle = servoDict[segment][axis].currentAngle
     or use the following to get a dictionary of angles:
+    """
     servoAngles = {
         segment : {
             axis : servoDict[segment][axis].currentAngle for axis in servoDict[segment].keys()
         } for segment in servoDict.keys()
     }
-
+    """
     targetAngles in the form:
     {
         1: {
@@ -51,24 +51,21 @@ def calculateTargetAngles(servoDict, targetRelPos):
     }
     """
     targetAngles = {}
-    # Reset the central servo and first stage servo
-    intersec_point = getSphereIntersection(r_in=1, R_in=1.5, a_in=sqrt(2/3), b_in=sqrt(2/3), c_in=sqrt(2/3), w_in=[0, 1, 0])
     return targetAngles
 
-"""
-OUTPUTS
-radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
-dist: the distance to the center of the intersection from the center of the first sphere: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
-angles: the two angles that lead to the intersection of the two spheres
 
-INPUTS
-r: radius of the first sphere
-R: radius of the second sphere
-a: x-distance from the first sphere to the second sphere
-b: y-distance from the first sphere to the second sphere
-c: z-distance from the first sphere to the second sphere
-w: a 2D normalized vector representing the point on the circle to get
-"""
+# OUTPUTS
+# radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
+# dist: the distance to the center of the intersection from the center of the first sphere: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
+# angles: the two angles that lead to the intersection of the two spheres
+
+# INPUTS
+# r: radius of the first sphere
+# R: radius of the second sphere
+# a: x-distance from the first sphere to the second sphere
+# b: y-distance from the first sphere to the second sphere
+# c: z-distance from the first sphere to the second sphere
+# w: a 2D normalized vector representing the point on the circle to get
 def getSphereIntersection(r_in, R_in, a_in, b_in, c_in, w_in):
     r, R, a, b, c = symbols('r R a b c')
     # d: distance from the center of the first sphere to the center of the second sphere
@@ -94,7 +91,7 @@ def getSphereIntersection(r_in, R_in, a_in, b_in, c_in, w_in):
     # Project the center of the intersection circle onto the x-y plane
     p = Matrix([p[0], p[1], 0])
 
-    # make sure that w_1^2 + w_2^2=1 -> 0 = 1 - w_1^2 - w_2^2 is satisfied
+    # make sure that w_1^2 + w_2^2=1 -> 0 = 1 - w_1^2 - w_2^2is satisfied
     assert 1 - w_in[0]**2 - w_in[1]**2 < 0.001
     assert w_in[2] == 0
 
@@ -106,3 +103,6 @@ def getSphereIntersection(r_in, R_in, a_in, b_in, c_in, w_in):
     intersec_point = Matrix([q[0], q[1], plane_z])
     intersec_point = intersec_point.subs([(w1, w_in[0]), (w2, w_in[1]), (w3, w_in[2])])
     return intersec_point
+
+intersec_point = getSphereIntersection(r_in=1, R_in=1.5, a_in=sqrt(2/3), b_in=sqrt(2/3), c_in=sqrt(2/3), w_in=[0, 1, 0])
+print(intersec_point)

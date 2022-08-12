@@ -66,9 +66,9 @@ def testStart(servoDict):
 
 def moveSegment(servoDict, segment, angles):
     lrServo = servoDict[segment]["lr"]
-    udServo = servoDict[segment]["ud"]
+    bfServo = servoDict[segment]["bf"]
     lrServo.setAngle(angles["lr"])
-    udServo.setAngle(angles["ud"])
+    bfServo.setAngle(angles["bf"])
 
 def setAllAngles(servoDict, angle):
     for servo in servoDict.values():
@@ -80,15 +80,15 @@ def batchSetAngles(servoDict, batchAngles):
     {
         1: {
             "lr": 90,
-            "ud": 2
+            "bf": 2
         },
         2: {
             "lr": 3,
-            "ud": 4
+            "bf": 4
         },
         3: {
             "lr": 5,
-            "ud": 6
+            "bf": 6
         }
     }
     """

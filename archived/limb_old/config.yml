@@ -9,10 +9,10 @@ numSegments: 2
 servoPins: {
     1: {
         "lr": 12,
-        "ud": 32
+        "bf": 32
     },
     2: {
         "lr": 33,
-        "ud": 35
+        "bf": 35
     }  
 }

@@ -35,15 +35,15 @@ def moveSegments():
     print("demoSegments()")
     driver.resetAngles()
     anglesDict = {
-        "home": {"lr": 0, "ud": 0},
-        "left": {"lr": 90, "ud": 0},
-        "right": {"lr": -90, "ud": 0},
-        "up": {"lr": 0, "ud": 90},
-        "down": {"lr": 0, "ud": -90},
-        "upleft": {"lr": 90, "ud": 90},
-        "upright": {"lr": -90, "ud": 90},
-        "downleft": {"lr": 90, "ud": -90},
-        "downright": {"lr": -90, "ud": -90},
+        "home": {"lr": 0, "bf": 0},
+        "left": {"lr": 90, "bf": 0},
+        "right": {"lr": -90, "bf": 0},
+        "up": {"lr": 0, "bf": 90},
+        "down": {"lr": 0, "bf": -90},
+        "upleft": {"lr": 90, "bf": 90},
+        "upright": {"lr": -90, "bf": 90},
+        "downleft": {"lr": 90, "bf": -90},
+        "downright": {"lr": -90, "bf": -90},
     }
     
     movements = [
