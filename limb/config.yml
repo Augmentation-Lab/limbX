@@ -1,18 +1,32 @@
-numSegments: 1
+numSegments: 3
 servoPins: {
     0: {
         "central": 15,
     },
     1: {
         "lr": 0,
-        "ud": 1
+        "bf": 1
     },
     2: {
         "lr": 2,
-        "ud": 3
+        "bf": 3
     },
     3: {
         "lr": 4,
-        "ud": 5
+        "bf": 5
+    }  
+}
+
+numSegmentsToCalib: 2
+calibrationDict: {
+    1: {
+        "minAngle": 0,
+        "maxAngle": 180,
+        "angleInterval": 30
+    },
+    2: {
+        "minAngle": 0,
+        "maxAngle": 180,
+        "angleInterval": 30
     }
 }
