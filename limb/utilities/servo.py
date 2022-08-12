@@ -8,8 +8,8 @@ https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 #import RPi.GPIO as GPIO
 from time import sleep
 from collections import defaultdict
-from adafruit_servokit import ServoKit
-kit = ServoKit(channels=16)
+#from adafruit_servokit import ServoKit
+#kit = ServoKit(channels=16)
 
 class Servo:
     def __init__(self, name, pin, minAngle=0, maxAngle=180):
@@ -27,12 +27,10 @@ class Servo:
             angle = self.minAngle
         elif angle > self.maxAngle:
             angle = self.maxAngle
-            
-        # sleep(1)
-        # self.pausePWM()
-        kit.servo[self.pin].angle = angle
-        
+
+        #kit.servo[self.pin].angle = angle
         self.currentAngle = angle
+        sleep(1)
 
 def initialize(servoPins):
     servoDict = defaultdict()
@@ -46,11 +44,6 @@ def initialize(servoPins):
 
 def shutdown(servoDict):
     print("shutting down...")
-
-def testStart(servoDict):
-    setAllAngles(servoDict, 90)
-    # sleep(1)
-    setAllAngles(servoDict, 0)
 
 def moveSegment(servoDict, segment, angles):
     lrServo = servoDict[segment]["lr"]
@@ -67,6 +60,9 @@ def batchSetAngles(servoDict, batchAngles):
     """
     batchAngles is a dictionary of angles to set
     {
+        0: {
+            "central": 90
+        }
         1: {
             "lr": 90,
             "bf": 2
@@ -85,5 +81,3 @@ def batchSetAngles(servoDict, batchAngles):
         for axis in batchAngles[segment].keys():
             servoDict[segment][axis].setAngle(batchAngles[segment][axis])
 
-            
-    

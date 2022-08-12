@@ -4,35 +4,35 @@ demonstrates tentacle functionality
 """
 import driver
 from time import sleep
+# import TargetPos
+from utilities.classes import TargetPos
 
-def demo(demoMoveSegments=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False):
-    if demoMoveSegments: moveSegments()
-    if demoExploreWorkspace: exploreWorkspace()
-    if demoGrab: grab()
-    if demoRelease: release()
-    if demoWaveHello: waveHello()
+def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False, demoMoveTo=False):
+    driver.initialize()
+    if demoMoveAround:
+        moveSegments()
+    if demoExploreWorkspace:
+        driver.resetAngles()
+        # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
+        print("exploreWorkspace()")
+    if demoGrab:
+        print("grab()")
+        driver.grab()
+    if demoRelease:
+        print("release()")
+        driver.release()
+    if demoWaveHello:
+        # implement later
+        print("waveHello()")
+    if demoMoveTo:
+        print("moveTo(target={target})")
+        driver.move(TargetPos(1,2,0))
     driver.shutdown()
-
-demo(demoMoveSegments=True, demoGrab=True, demoRelease=True)
-
-# SINGLE MOVES
-
-def moveTo(targetRelPos):
-    print("moveTo(target={target})")
-    driver.move(targetRelPos)
-
-def grab():
-    print("grab()")
-    driver.grab()
-
-def release():
-    print("release()")
-    driver.release()
 
 # SEQUENCES
 
-def moveSegments():
-    print("demoSegments()")
+def demoMoveAround():
+    print("demoMoveAround()")
     driver.resetAngles()
     anglesDict = {
         "home": {"lr": 0, "bf": 0},
@@ -45,9 +45,9 @@ def moveSegments():
         "downleft": {"lr": 90, "bf": -90},
         "downright": {"lr": -90, "bf": -90},
     }
-    
+
     movements = [
-        "home", "left", 
+        "home", "left",
         "home", "right",
         "home", "up",
         "home", "down",
@@ -56,28 +56,11 @@ def moveSegments():
         "home", "downleft",
         "home", "downright",
         "home"
-        ]
+    ]
 
     for segment in range(1, len(driver.systemSTATE.numSegments)+1):
         for movement in movements:
             driver.moveSegment(segment, anglesDict[movement])
             sleep(1)
 
-def exploreWorkspace():
-    driver.resetAngles()
-    # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
-    print("exploreWorkspace()")
-
-def waveHello():
-    # implement later
-    print("waveHello()")
-
-
-# only implementable in integration with UI
-# def moveAndGrab(targetObj):
-#     print(f"moveAndGrab(object={targetObj})")
-#     driver.executeCommands([{"move": targetObj}, {"grab": targetObj}])
-
-# def moveAndRelease(targetObj):
-#     print(f"moveAndRelease(object={targetObj})")
-#     driver.executeCommands([{"move": targetObj}, {"release": targetObj}])
+demo(demoMoveSegments=False, demoGrab=False, demoRelease=False, demoMoveTo=True)

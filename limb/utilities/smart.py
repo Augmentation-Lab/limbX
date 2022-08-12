@@ -4,6 +4,82 @@ calculates control sequences
 """
 from sympy import *
 
+<<<<<<< HEAD
+=======
+# Lenghts of the segments in meters
+SEG_1 = 0.8
+SEG_2 = 0.4
+SEG_3 = 0.2
+
+# NOTE:
+# x-axis is left-right
+# y-axis is forward backward
+# z-axis is up down
+CALIBRATE = {
+    # the position of the tip of the first stage relative to the central servo when the servo is at a preset bend amount
+    "seg1": {
+        "x": 1,
+        "y": 2,
+        "z": 3,
+        "preset": {
+            "lr": 40,
+            "ud": 40
+        }
+    },
+    "seg2": {
+        "hi": "okay"
+    }
+}
+
+def getV1(targetAngles, targetRelPos):
+    """
+    INPUT:
+    targetAngles: dictionary of angles to set
+    targetRelPos: 3D vector describing the location to go to from the central servo to the destination
+    OUTPUT:
+    targetAngles: the angles to set, with the first stage "filled in"
+    v1: the location of our first stage
+    """
+
+    # top right quadrant
+    if(targetRelPos.x >= 0 and targetRelPos.z >= 0):
+        v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], CALIBRATE["seg1"]["z"]])
+        targetAngles[0] = {"central": 35}
+        targetAngles[1] = {
+            "lr": CALIBRATE["seg1"]["preset"]["lr"],
+            "ud": CALIBRATE["seg1"]["preset"]["ud"]
+        }
+    # bottom right quadrant
+    elif(targetRelPos.x >= 0 and targetRelPos.z < 0):
+        v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], -CALIBRATE["seg1"]["z"]])
+
+        targetAngles[0] = {"central": 70}
+        targetAngles[1] = {
+            "lr": CALIBRATE["seg1"]["preset"]["lr"],
+            "ud": CALIBRATE["seg1"]["preset"]["ud"]
+        }
+    # top left quadrant
+    elif(targetRelPos.x < 0 and targetRelPos.z >= 0):
+        v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], CALIBRATE["seg1"]["z"]])
+        targetAngles[0] = {"central": 90}
+        targetAngles[1] = {
+            "lr": CALIBRATE["seg1"]["preset"]["lr"],
+            "ud": CALIBRATE["seg1"]["preset"]["ud"]
+        }
+    # bottom left quadrant
+    elif(targetRelPos.x < 0 and targetRelPos.z < 0):
+        v1 = Matrix([-CALIBRATE["seg1"]["x"], -CALIBRATE["seg1"]["y"], -CALIBRATE["seg1"]["z"]])
+        targetAngles[0] = {"central": 105}
+        targetAngles[1] = {
+            "lr": CALIBRATE["seg1"]["preset"]["lr"],
+            "ud": CALIBRATE["seg1"]["preset"]["ud"]
+        }
+    else:
+        raise Exception("Invalid targetRelPos")
+    return targetAngles, v1
+
+
+>>>>>>> e81d43f1840d09cc4e7d40f6771e3135d770a0bd
 def calculateTargetAngles(servoDict, targetRelPos):
     """
     a 3D vector describing the location to go to from the tip of the first stage
@@ -25,9 +101,11 @@ def calculateTargetAngles(servoDict, targetRelPos):
             "bf": Servo(name="3_bf", pin=6)
         }
     }
+
     access angle via:
     angle = servoDict[segment][axis].currentAngle
     or use the following to get a dictionary of angles:
+
     servoAngles = {
         segment : {
             axis : servoDict[segment][axis].currentAngle for axis in servoDict[segment].keys()
@@ -36,6 +114,9 @@ def calculateTargetAngles(servoDict, targetRelPos):
 
     targetAngles in the form:
     {
+        0: {
+            "central": 90
+        }
         1: {
             "lr": -10,
             "bf": 15
@@ -50,32 +131,67 @@ def calculateTargetAngles(servoDict, targetRelPos):
         }
     }
     """
+
     targetAngles = {}
+    # get v_1 (starting from central servo) and set corresponding angles
+    targetAngles, v1 = getV1(targetAngles, targetRelPos)
+    print(targetAngles)
+    print(v1)
+    print("HI")
+    #targetAngles, v1 = getV2(targetAngles, targetRelPos)
+
+
     # Reset the central servo and first stage servo
     intersec_point = getSphereIntersection(r_in=1, R_in=1.5, a_in=sqrt(2/3), b_in=sqrt(2/3), c_in=sqrt(2/3), w_in=[0, 1, 0])
+    # r_in: length of segment 2
+    # R_in: length of esgment 3
+    # a_in, b_in, c_in: position of the object
+
+    # get the angle between the tip of the first stage
+
+
     return targetAngles
 
+<<<<<<< HEAD
 """
 OUTPUTS
 radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
 dist: the distance to the center of the intersection from the center of the first sphere: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
 angles: the two angles that lead to the intersection of the two spheres
+=======
+def Calibrate():
+    # iterate from 0 to 270 degrees on teh servo
+    # print the current servo angle
+    # note at what points the tentacle is at -45, 0, and 45 degrees from vertical
 
-INPUTS
-r: radius of the first sphere
-R: radius of the second sphere
-a: x-distance from the first sphere to the second sphere
-b: y-distance from the first sphere to the second sphere
-c: z-distance from the first sphere to the second sphere
-w: a 2D normalized vector representing the point on the circle to get
-"""
+    # servo angle: corresponding tentacle angle
+    return CALIBRATE
+
+>>>>>>> e81d43f1840d09cc4e7d40f6771e3135d770a0bd
+
 def getSphereIntersection(r_in, R_in, a_in, b_in, c_in, w_in):
+    """
+    INPUTS
+    r: radius of the first sphere
+    R: radius of the second sphere
+    a: x-distance from the first sphere to the second sphere
+    b: y-distance from the first sphere to the second sphere
+    c: z-distance from the first sphere to the second sphere
+    w: a 2D normalized vector representing the point on the circle to get
+
+    OUTPUTS
+    angles: the two angles that lead to the intersection of the two spheres
+    """
+
     r, R, a, b, c = symbols('r R a b c')
     # d: distance from the center of the first sphere to the center of the second sphere
     d = sqrt(a**2 + b**2 + c**2)
 
+    # dist: the distance to the center of the intersection from the center of the first sphere: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
     dist = (d**2 - r**2 + R**2)/(2*d)
     dist = dist.subs([(r, r_in), (R, R_in), (a, a_in), (b, b_in), (c, c_in)])
+
+    # radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
     radius = 1/(2*d)*sqrt(4*d**2*R**2 - (d**2 - r**2 + R**2)**2)
     radius = radius.subs([(r, r_in), (R, R_in), (a, a_in), (b, b_in), (c, c_in)])
 
