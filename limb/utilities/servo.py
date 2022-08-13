@@ -8,11 +8,11 @@ https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 #import RPi.GPIO as GPIO
 from time import sleep
 from collections import defaultdict
-#from adafruit_servokit import ServoKit
-#kit = ServoKit(channels=16)
+from adafruit_servokit import ServoKit
+kit = ServoKit(channels=16)
 
 class Servo:
-    def __init__(self, name, pin, minAngle=0, maxAngle=180):
+    def __init__(self, name, pin, minAngle=0, maxAngle=270):
         print(f"Initializing servo {name} on pin {pin}")
         self.name = name
         self.pin = pin
@@ -28,7 +28,7 @@ class Servo:
         elif angle > self.maxAngle:
             angle = self.maxAngle
 
-        #kit.servo[self.pin].angle = angle
+        kit.servo[self.pin].angle = angle
         self.currentAngle = angle
         sleep(1)
 
@@ -44,12 +44,6 @@ def initialize(servoPins):
 
 def shutdown(servoDict):
     print("shutting down...")
-
-def moveSegment(servoDict, segment, angles):
-    lrServo = servoDict[segment]["lr"]
-    udServo = servoDict[segment]["ud"]
-    lrServo.setAngle(angles["lr"])
-    udServo.setAngle(angles["ud"])
 
 def setAllAngles(servoDict, angle):
     for servo in servoDict.values():

@@ -29,7 +29,10 @@ def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoR
         # position relative ot the central servo
         target = TargetPos(2,1,3)
         print(f"moveTo(target={target})")
-        driver.move(target)
+        #driver.move(target)
+        driver.moveCentral(135)
+        sleep(5)
+        #driver.moveCentral(270)
     driver.shutdown()
 
 # SEQUENCES

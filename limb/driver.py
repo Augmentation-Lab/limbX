@@ -43,6 +43,21 @@ def release():
 def grab():
     hand.grab()
 
+def moveCentral(angle):
+    servo.batchSetAngles(systemSTATE.servoDict, {
+        0: {
+            "central": angle,
+        },
+    })
+
 def moveSegment(segment, angles):
-    servo.moveSegment(systemSTATE.servoDict, segment, angles)
+    lrServo = servoDict[segment]["lr"]
+    udServo = servoDict[segment]["ud"]
+    servo.batchSetAngles(systemSTATE.servoDict, {
+        [segment]: {
+            "lr": angles["lr"],
+            "ud": angles["ud"]
+        }
+    })
+    #servo.moveSegment(systemSTATE.servoDict, segment, angles)
 
