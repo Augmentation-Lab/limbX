@@ -6,8 +6,6 @@ receives data from Tobii glasses
 import cv2
 import av
 from tobiiglassesctrl import TobiiGlassesController
-# import driver, vision
-# from utilities.classes import TargetObj
 import time
 from datetime import datetime
 
@@ -15,18 +13,6 @@ def initialize(tobiiglasses):
     tobiiglasses.start_streaming()
     print("Please wait ...")
     time.sleep(1.0)
-
-    # eyeDataHistory = {"right": [], "left": []}
-    # while True:
-    #     print("----------------------------------")
-    #     print("Left Eye: %s " % tobiiglasses.get_data()['left_eye'])
-    #     print("Right Eye: %s " % tobiiglasses.get_data()['right_eye'])
-    #     eyeDataHistory["left"].append(tobiiglasses.get_data()['left_eye'])
-    #     eyeDataHistory["right"].append(tobiiglasses.get_data()['right_eye'])
-    #     if len(eyeDataHistory["left"]) > 2:
-    #         eyeDataHistory["left"].pop(0)
-    #         eyeDataHistory["right"].pop(0)
-        
 
 def capture_photo(tobiiglasses, ipv4_address):
     broken = False
@@ -57,13 +43,3 @@ def capture_photo(tobiiglasses, ipv4_address):
             break
 
     return imgFolderPath, data_gp
-
-    # cv2.destroyAllWindows()
-
-    # tobiiglasses.stop_streaming()
-    # tobiiglasses.close()
-
-
-    # targetObj.relPos = vision.get_rel_pos(targetObj)
-    
-    # driver.executeCommands([{"move": targetObj.relPos}])
