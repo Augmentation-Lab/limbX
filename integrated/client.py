@@ -14,7 +14,7 @@ def initialize(tobiiglasses):
     print("Please wait ...")
     time.sleep(1.0)
 
-def capture_photo(tobiiglasses, ipv4_address):
+def capturePphoto(tobiiglasses, ipv4_address):
     broken = False
     video = av.open("rtsp://%s:8554/live/scene" % ipv4_address, "r")
     for packet in video.demux():

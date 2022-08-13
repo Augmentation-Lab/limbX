@@ -106,6 +106,9 @@ def run_vision(queryImgPath, targetImgPath, eyeData):
     print("========================")
     print("Running vision on query: ", queryImgPath)
     targetBboxes, imgDimensions = detect_objects(targetImgPath)
+
+    print("DEBUG IMG DIMENSIONS: ", imgDimensions)
+    
     targetBbox = find_target_bbox(imgDimensions, targetBboxes, eyeData)
     croppedImgPath = crop_image(targetImgPath, targetBbox)
     queryTargetBbox = find_query_target(queryImgPath, croppedImgPath)
@@ -116,6 +119,7 @@ def run_vision(queryImgPath, targetImgPath, eyeData):
     plt.savefig(f'{queryImgPath.split(".")[0]}_result.png')
 
     print("TARGET CENTER: ", queryTargetCenter)
+    return queryTargetCenter
 
 
 # for imgFolder in os.listdir("data"):
