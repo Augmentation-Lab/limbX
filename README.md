@@ -43,15 +43,15 @@ INPUTS
 servoDict = {
     1: {
         "lr": Servo(name="1_lr", pin=1),
-        "bf": Servo(name="1_bf", pin=2)
+        "ud": Servo(name="1_ud", pin=2)
     },
     2: {
         "lr": Servo(name="2_lr", pin=3),
-        "bf": Servo(name="2_bf", pin=4)
+        "ud": Servo(name="2_ud", pin=4)
     },
     3: {
         "lr": Servo(name="3_lr", pin=5),
-        "bf": Servo(name="3_bf", pin=6)
+        "ud": Servo(name="3_ud", pin=6)
     }
 }
 relativeObjPos = TargetPos(x=10,y=20,z=5)
@@ -61,15 +61,15 @@ OUTPUTS
 servoTargetAngles = {
     1: {
         "lr": -10,
-        "bf": 15
+        "ud": 15
     },
     2: {
         "lr": 20,
-        "bf": 25
+        "ud": 25
     },
     3: {
         "lr": 15,
-        "bf": 90
+        "ud": 90
     }
 }
 ```

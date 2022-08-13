@@ -16,15 +16,15 @@ from time import sleep
 # servoDict = {
 #     1: {
 #         "lr": 1,
-#         "bf": 2
+#         "ud": 2
 #     },
 #     2: {
 #         "lr": 3,
-#         "bf": 4
+#         "ud": 4
 #     },
 #     3: {
 #         "lr": 5,
-#         "bf": 6
+#         "ud": 6
 #     }
 # }
 

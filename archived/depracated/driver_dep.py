@@ -23,7 +23,7 @@ numSegments = 1
 
 GPIO.setmode(GPIO.BOARD)
 lrServoPin = 12
-bfServoPin = 11
+udServoPin = 11
 
 GPIO.setup(lrServoPin, GPIO.OUT)
 
