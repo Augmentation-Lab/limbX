@@ -47,9 +47,9 @@ def shutdown(servoDict):
 
 def moveSegment(servoDict, segment, angles):
     lrServo = servoDict[segment]["lr"]
-    bfServo = servoDict[segment]["bf"]
+    udServo = servoDict[segment]["ud"]
     lrServo.setAngle(angles["lr"])
-    bfServo.setAngle(angles["bf"])
+    udServo.setAngle(angles["ud"])
 
 def setAllAngles(servoDict, angle):
     for servo in servoDict.values():
@@ -65,15 +65,15 @@ def batchSetAngles(servoDict, batchAngles):
         }
         1: {
             "lr": 90,
-            "bf": 2
+            "ud": 2
         },
         2: {
             "lr": 3,
-            "bf": 4
+            "ud": 4
         },
         3: {
             "lr": 5,
-            "bf": 6
+            "ud": 6
         }
     }
     """

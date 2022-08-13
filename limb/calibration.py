@@ -10,8 +10,8 @@ complexCalibration (including dependencies):
 {
     0: 135lr,
     1: 135lr,
-    2: (135lr, 135bf),
-    3: (135lr, 135bf)
+    2: (135lr, 135ud),
+    3: (135lr, 135ud)
 }
 mediumCalibration (including dependencies but assuming symmetry):
 {
@@ -24,8 +24,8 @@ simpleCalibration (excluding dependencies):
 {
     0: 135lr,
     1: 135lr,
-    2: (135lr, 135bf),
-    3: (135lr, 135bf)
+    2: (135lr, 135ud),
+    3: (135lr, 135ud)
 }
 """
 
