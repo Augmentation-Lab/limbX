@@ -27,7 +27,16 @@ seg2:
     Note that alpha is the angle taken forward from the z-axis (it becomes >180 when you cross into the negative x-axis)
     Beta is the angle taken counter clockwise from the x-axis
     When we calibrate seg2, we put it in the top right default position and then measure the angles of the servos
+seg3:
+    servoActualAngle consists of 3 ordered pairs
+    The first pair is the servo angle for the second segment
+    The second pair is the servo angle for the third segment
+    The third pair is the actual angle the third segment is at
+    The structure used for the first pair of angles is the same as thast in seg2
+    The structure used for the second pair of angles is the same as thast in seg2,
+    in that we are getting the angle measures relative to vertical (not the previous segment) as well the x-axis (again, not the previous segment)
 """
+
 CALIBRATE = {
     "central": {
         "servoIdx": 0,
@@ -48,7 +57,6 @@ CALIBRATE = {
     },
     "seg2": {
         "servoIdx": 2,
-        # 90 135 180
         "servoActualAngle": {
             0: [(90, 90), (-90,-40)],
             1: [(90, 135), (-39, 34)],
@@ -63,6 +71,17 @@ CALIBRATE = {
     },
     "seg3": {
         "servoIdx": 3,
+        "servoActualAngle": {
+            0: [(190, 135), (90, 90), (90, 30)],
+            1: [(90, 90), (90, 135), (90, 135)],
+            2: [(90, 90), (90, 180), (90, 180)],
+            3: [(90, 135), (135, 90), (135, 90)],
+            4: [(90, 135), (135, 135), (135, 135)],
+            5: [(90, 135), (135, 180), (135, 180)],
+            6: [(135, 90), (180, 90), (180, 90)],
+            7: [(135, 90), (180, 135), (180, 135)],
+            8: [(135, 90), (180, 180), (180, 180)],
+        }
     }
 }
 
@@ -190,26 +209,30 @@ def calculateTargetAngles(servoDict, targetRelPos):
     # the end effector intended position == end effector actual position
     assert (targRelPos - (v1 + v2 + v3)).norm() < 0.001
 
-    # theta:
-    #   Description: the angle from the z-axis to v2
-    #   Purpose: which servo combination best suits the second stage.
-    #   we wish to find a servo combination such that it's ifrst angle is as close to theta as possible
-    #   Note: v2 \dot [0; 0; 1] = |v2| cos(theta) -> theta = acos(v2/|v2| \dot [0; 0; 1])
-    theta = acos( (v2/v2.norm()).dot(Matrix([0, 0, 1])) )
-    theta = math.degrees(theta)
+    def vec2angles(vec):
+        # theta:
+        #   Description: the angle from the z-axis to vec
+        #   Purpose: which servo combination best suits the second stage.
+        #   we wish to find a servo combination such that it's ifrst angle is as close to theta as possible
+        #   Note: v \dot [0; 0; 1] = |v| cos(theta) -> theta = acos(v/|v| \dot [0; 0; 1])
+        theta = acos( (vec/vec.norm()).dot(Matrix([0, 0, 1])) )
+        theta = math.degrees(theta)
 
-    # phi:
-    #   Description: the angle from the x-axis to v2 projected onto the x-y axis
-    #   Purpose: which servo combination best suits the second stage.
-    #   we wish to find a servo combination such that it's second angle is as close to phi as possible
-    #   Note: [v2(0), v2(1), 0] \dot [1; 0; 0] = |[v2(0), v2(1), 0]| cos(phi) -> phi = acos([v2(0), v2(1), 0]/|[v2(0), v2(1), 0]| \dot [1; 0; 0])
-    phi = acos( ( Matrix([v2[0], v2[1], 0])/(Matrix([v2[0], v2[1], 0]).norm()) ).dot(Matrix([1, 0, 0])) )
-    phi = math.degrees(phi)
+        # phi:
+        #   Description: the angle from the x-axis to vec projected onto the x-y axis
+        #   Purpose: which servo combination best suits the second stage.
+        #   we wish to find a servo combination such that it's second angle is as close to phi as possible
+        #   Note: [vec(0), vec(1), 0] \dot [1; 0; 0] = |[vec(0), vec(1), 0]| cos(phi) -> phi = acos([vec(0), vec(1), 0]/|[vec(0), vec(1), 0]| \dot [1; 0; 0])
+        phi = acos( ( Matrix([vec[0], vec[1], 0])/(Matrix([vec[0], vec[1], 0]).norm()) ).dot(Matrix([1, 0, 0])) )
+        phi = math.degrees(phi)
 
-    # The dot product is always the closest angle between the two lines, therefore, it is always less than 180
-    # this is fine for theta, but we need the full ROM for 360 degrees
-    if(v2[0] < 0):
-        phi = 360 - phi
+        # The dot product is always the closest angle between the two lines, therefore, it is always less than 180
+        # this is fine for theta, but we need the full ROM for 360 degrees
+        if(vec[0] < 0):
+            phi = 360 - phi
+        return theta, phi
+
+    theta, phi = vec2angles(v2)
 
     # servoAngle:
     #  Description: the set of servo angles that most closely achieves [theta, phi]
@@ -239,6 +262,23 @@ def calculateTargetAngles(servoDict, targetRelPos):
         "ud": servoAngles[1]
     }
 
+    theta, phi = vec2angles(v3)
+    # the index of the servo angle that yields the closest actual angle to [theta, phi] AND the second segment's existing angle values
+    minError = None # {'index': 0, 'error': 1}
+    for option, servoActualCombo in CALIBRATE["seg3"]["servoActualAngle"].items():
+        # servoActualCombo = [(180, 90), (71, 57), (33, 31)]
+        seg2Calibrate = servoActualCombo[0]
+        actualAngle = servoActualCombo[2]
+        # the error betwenn the calibreated actual angle and the target actual angle
+        errorAngle = (actualAngle[0] - theta)**2 + (actualAngle[1] - phi)**2
+        # Get the error between the calibrated servo angles for segment 2 and the actual servo angles of segment 2
+        errorSeg2 = (seg2Calibrate[0] - servoAngles[0])**2 + (seg2Calibrate[1] - servoAngles[1])**2
+        error = errorAngle + errorSeg2
+        if minError == None:
+            minError = {'index': option, 'error': error}
+        else:
+            if error < minError['error']:
+                minError = {'index': option, 'error': error}
 
     return targetAngles
 

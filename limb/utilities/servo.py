@@ -5,7 +5,6 @@ refs: https://www.instructables.com/Servo-Motor-Control-With-Raspberry-Pi/,
 https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 """
 
-#import RPi.GPIO as GPIO
 from time import sleep
 from collections import defaultdict
 from adafruit_servokit import ServoKit

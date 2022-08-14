@@ -51,8 +51,6 @@ def moveCentral(angle):
     })
 
 def moveSegment(segment, angles):
-    lrServo = servoDict[segment]["lr"]
-    udServo = servoDict[segment]["ud"]
     servo.batchSetAngles(systemSTATE.servoDict, {
         [segment]: {
             "lr": angles["lr"],
