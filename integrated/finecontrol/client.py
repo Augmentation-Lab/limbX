@@ -1,5 +1,5 @@
 import bluepy.btle as btle
-p = btle.Peripheral("de:fc:54:87:b0:04")
+p = btle.Peripheral("c9:0a:c6:85:3f:18")
 services=p.getServices()
 s = p.getServiceByUUID(list(services)[2].uuid)
 c = s.getCharacteristics()[0]
