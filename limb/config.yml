@@ -1,32 +1,36 @@
-numSegments: 3
-servoPins: {
-    0: {
-        "central": 6,
-    },
-    1: {
-        "lr": 0,
-        "ud": 1
-    },
-    2: {
-        "lr": 2,
-        "ud": 3
-    },
-    3: {
-        "lr": 4,
-        "ud": 5
-    }  
-}
+servoPins:
+  {
+    0: { "central": 6 },
+    1: { "lr": 0, "ud": 1 },
+    2: { "lr": 2, "ud": 3 },
+    3: { "lr": 4, "ud": 5 },
+  }
 
-numSegmentsToCalib: 2
-calibrationDict: {
-    1: {
+calibrationDict:
+  {
+    "central":
+      {
+        "servoIdx": 0,
         "minAngle": 0,
         "maxAngle": 180,
-        "angleInterval": 30
-    },
-    2: {
-        "minAngle": 0,
-        "maxAngle": 180,
-        "angleInterval": 30
-    }
-}
+        "angleInterval": 10,
+        "description":
+          "servoIdx: the index of the servos for that segment (the same as the key in config.yml)
+          minAngle-maxAngle: limits of the servo that we will even test
+          angleInterval: size of jumps to make between iterations",
+      },
+    "seg1":
+      {
+        "servoIdx": 1,
+        "minAngle": { lr: 0, ud: 0 },
+        "maxAngle": { lr: 180, ud: 180 },
+        "angleInterval": 20,
+      },
+    "seg2":
+      {
+        "servoIdx": 2,
+        "minAngle": { lr: 0, ud: 0 },
+        "maxAngle": { lr: 180, ud: 180 },
+        "angleInterval": 20,
+      },
+  }

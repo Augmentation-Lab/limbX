@@ -2,44 +2,51 @@
 DEMO SCRIPT
 demonstrates tentacle functionality
 """
-import driver
 from time import sleep
 # import TargetPos
 from utilities.classes import TargetPos
 from sympy import *
+from utilities import servo, smart, hand
+import utilities.servoDict as servoDict
+# INITIALIZATION
+
 
 def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False, demoMoveTo=False):
-    driver.initialize()
+    systemSTATE = servoDict.initialize()
     if demoMoveAround:
-        demoMoveAround()
+        demoMoveAround(systemSTATE)
     if demoExploreWorkspace:
-        driver.resetAngles()
         # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
         print("exploreWorkspace()")
     if demoGrab:
         print("grab()")
-        driver.grab()
+        hand.grab()
     if demoRelease:
         print("release()")
-        driver.release()
+        hand.release()
     if demoWaveHello:
         # implement later
         print("waveHello()")
+        servo.batchSetAngles(systemSTATE.servoDict, {
+            0: {
+                "central": 135,
+            },
+        })
     if demoMoveTo:
         # position relative ot the central servo
-        target = TargetPos(2,1,3)
+        target = TargetPos(2, 1, 3)
         print(f"moveTo(target={target})")
-        driver.move(target)
-        #driver.moveCentral(135)
-        sleep(5)
-        #driver.moveCentral(270)
-    driver.shutdown()
+        targetAngles = smart.calculateTargetAngles(
+            systemSTATE.servoDict, target)
+        servo.batchSetAngles(systemSTATE.servoDict, targetAngles)
+
+    servo.shutdown(systemSTATE.servoDict)
 
 # SEQUENCES
 
-def demoMoveAround():
+
+def demoMoveAround(systemSTATE):
     print("demoMoveAround()")
-    driver.resetAngles()
     anglesDict = {
         "home": {"lr": 0, "bf": 0},
         "left": {"lr": 90, "bf": 0},
@@ -64,9 +71,15 @@ def demoMoveAround():
         "home"
     ]
 
-    for segment in range(1, len(driver.systemSTATE.numSegments)+1):
+    for segment in range(1, len(systemSTATE.numSegments)+1):
         for movement in movements:
-            driver.moveSegment(segment, anglesDict[movement])
+            servo.batchSetAngles(systemSTATE.servoDict, {
+                [segment]: {
+                    "lr": anglesDict[movement]["lr"],
+                    "ud": anglesDict[movement]["ud"]
+                }
+            })
             sleep(1)
+
 
 demo(demoMoveTo=True)

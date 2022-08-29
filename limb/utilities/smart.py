@@ -4,134 +4,21 @@ calculates control sequences
 """
 from sympy import *
 import math
+
 # Lenghts of the segments in meters
 SEG_2 = 1
 SEG_3 = 1.5
+
+# The number of angles between 0 and 2pi to look at in order to minimize error between
+# the calibrated servo angles and the optimal servo angles
+#NUM_ANGLES = 6
 
 # NOTE:
 # x-axis is left-right
 # y-axis is forward backward
 # z-axis is up down
-"""
-servoIdx: the index of the servos for that segment (the same as the key in config.yml)
-central:
-    The angles for the 4 quadrants of the central servo
-seg1:
-    the position of the tip of the first stage relative to the central servo when the servo is at a preset bend amount
-    The first stage only operates at 4 distinct angles.
-    As such, in our callibration, we just "tense" the tentaclea fixed amount and rotate it around the central servo.
-    lr and ud represent the initial "tensed" values of the servos
-    x, y, and z represent the distance (in meters) from the central servo to the tip of the first stage
-seg2:
-    key-value paris are the degrees of the servos, followed by the angle (alpha and beta) achieved by the tentacle at those servo degrees
-    Note that alpha is the angle taken forward from the z-axis (it becomes >180 when you cross into the negative x-axis)
-    Beta is the angle taken counter clockwise from the x-axis
-    When we calibrate seg2, we put it in the top right default position and then measure the angles of the servos
-seg3:
-    servoActualAngle consists of 3 ordered pairs
-    The first pair is the servo angle for the second segment
-    The second pair is the servo angle for the third segment
-    The third pair is the actual angle the third segment is at
-    The structure used for the first pair of angles is the same as thast in seg2
-    The structure used for the second pair of angles is the same as thast in seg2,
-    in that we are getting the angle measures relative to vertical (not the previous segment) as well the x-axis (again, not the previous segment)
-"""
-
-CALIBRATE = {
-    "central": {
-        "servoIdx": 0,
-        "bl": 90,
-        "br": 135,
-        "tl": 155,
-        "tr": 180
-    },
-    "seg1": {
-        "servoIdx": 1,
-        "x": 1,
-        "y": 1/3,
-        "z": 2,
-        "preset": {
-            "lr": 40,
-            "ud": 45
-        }
-    },
-    "seg2": {
-        "servoIdx": 2,
-        "servoActualAngle": {
-            0: [(90, 90), (-90,-40)],
-            1: [(90, 135), (-39, 34)],
-            2: [(90, 180), (23,23)],
-            3: [(135, 90), (35, 23)],
-            4: [(135, 135), (32,41)],
-            5: [(135, 180), (12,203)],
-            6: [(180, 90), (18,233)],
-            7: [(180, 135), (18,235)],
-            8: [(180, 180), (77,22)],
-        }
-    },
-    "seg3": {
-        "servoIdx": 3,
-        "servoActualAngle": {
-            0: [(190, 135), (90, 90), (90, 30)],
-            1: [(90, 90), (90, 135), (90, 135)],
-            2: [(90, 90), (90, 180), (90, 180)],
-            3: [(90, 135), (135, 90), (135, 90)],
-            4: [(90, 135), (135, 135), (135, 135)],
-            5: [(90, 135), (135, 180), (135, 180)],
-            6: [(135, 90), (180, 90), (180, 90)],
-            7: [(135, 90), (180, 135), (180, 135)],
-            8: [(135, 90), (180, 180), (180, 180)],
-        }
-    }
-}
-
-def getV1(targetAngles, targetRelPos):
-    """
-    INPUT:
-    targetAngles: dictionary of angles to set
-    targetRelPos: 3D vector describing the location to go to from the central servo to the destination
-    OUTPUT:
-    targetAngles: the angles to set, with the first stage "filled in"
-    v1:
-        Type: Matrix
-        Description: the location of our first stage
-    """
-    # top right quadrant
-    if(targetRelPos.x >= 0 and targetRelPos.z >= 0):
-        v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], CALIBRATE["seg1"]["z"]])
-        targetAngles[CALIBRATE["central"]["servoIdx"]] = {"central": CALIBRATE["central"]["tr"]}
-        targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-            "lr": CALIBRATE["seg1"]["preset"]["lr"],
-            "ud": CALIBRATE["seg1"]["preset"]["ud"]
-        }
-    # bottom right quadrant
-    elif(targetRelPos.x >= 0 and targetRelPos.z < 0):
-        v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], -CALIBRATE["seg1"]["z"]])
-
-        targetAngles[CALIBRATE["central"]["servoIdx"]] = {"central": CALIBRATE["central"]["br"]}
-        targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-            "lr": CALIBRATE["seg1"]["preset"]["lr"],
-            "ud": CALIBRATE["seg1"]["preset"]["ud"]
-        }
-    # top left quadrant
-    elif(targetRelPos.x < 0 and targetRelPos.z >= 0):
-        v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], CALIBRATE["seg1"]["z"]])
-        targetAngles[CALIBRATE["central"]["servoIdx"]] = {"central": CALIBRATE["central"]["tl"]}
-        targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-            "lr": CALIBRATE["seg1"]["preset"]["lr"],
-            "ud": CALIBRATE["seg1"]["preset"]["ud"]
-        }
-    # bottom left quadrant
-    elif(targetRelPos.x < 0 and targetRelPos.z < 0):
-        v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]["y"], -CALIBRATE["seg1"]["z"]])
-        targetAngles[CALIBRATE["central"]["servoIdx"]] = {"central": CALIBRATE["central"]["bl"]}
-        targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-            "lr": CALIBRATE["seg1"]["preset"]["lr"],
-            "ud": CALIBRATE["seg1"]["preset"]["ud"]
-        }
-    else:
-        raise Exception("Invalid targetRelPos")
-    return targetAngles, v1
+# alpha angle is the angle from the z-axis, starting clockwise from the POV of the positive x-axis (standing from the right side of the graph)
+# beta is angle from the x-axis, starting counterclockwise from the POV of the positive z-axis (standing from a "bird's eye view")
 
 
 def calculateTargetAngles(servoDict, targetRelPos):
@@ -187,12 +74,74 @@ def calculateTargetAngles(servoDict, targetRelPos):
     """
     targRelPos = Matrix([targetRelPos.x, targetRelPos.y, targetRelPos.z])
     targetAngles = {}
+
+    def getV1(targetAngles, targetRelPos):
+        """
+        INPUT:
+        targetAngles: dictionary of angles to set
+        targetRelPos: 3D vector describing the location to go to from the central servo to the destination
+        OUTPUT:
+        targetAngles: the angles to set, with the first stage "filled in"
+        v1:
+            Type: Matrix
+            Description: the location of our first stage
+        """
+        # top right quadrant
+        if(targetRelPos.x >= 0 and targetRelPos.z >= 0):
+            v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
+                        ["y"], CALIBRATE["seg1"]["z"]])
+            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
+                "central": CALIBRATE["central"]["tr"]}
+            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
+                "lr": CALIBRATE["seg1"]["preset"]["lr"],
+                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            }
+            quadrant = "tr"
+        # bottom right quadrant
+        elif(targetRelPos.x >= 0 and targetRelPos.z < 0):
+            v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
+                        ["y"], -CALIBRATE["seg1"]["z"]])
+
+            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
+                "central": CALIBRATE["central"]["br"]}
+            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
+                "lr": CALIBRATE["seg1"]["preset"]["lr"],
+                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            }
+            quadrant = "br"
+        # top left quadrant
+        elif(targetRelPos.x < 0 and targetRelPos.z >= 0):
+            v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
+                        ["y"], CALIBRATE["seg1"]["z"]])
+            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
+                "central": CALIBRATE["central"]["tl"]}
+            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
+                "lr": CALIBRATE["seg1"]["preset"]["lr"],
+                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            }
+            quadrant = "tl"
+        # bottom left quadrant
+        elif(targetRelPos.x < 0 and targetRelPos.z < 0):
+            v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
+                        ["y"], -CALIBRATE["seg1"]["z"]])
+            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
+                "central": CALIBRATE["central"]["bl"]}
+            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
+                "lr": CALIBRATE["seg1"]["preset"]["lr"],
+                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            }
+            quadrant = "bl"
+        else:
+            raise Exception("Invalid targetRelPos")
+        return targetAngles, v1, quadrant
+
     # get v1 (vector from central servo to the tip of stage 1) and set corresponding angles
-    targetAngles, v1 = getV1(targetAngles, targetRelPos)
+    targetAngles, v1, quadrant = getV1(targetAngles, targetRelPos)
 
+    # for theta in range(0, NUM_ANGLES):
     # get v2 (vector from the tip of stage 1 to tip of stage 2) and set corresponding angles
-    v2 = getSphereIntersection(R_in=SEG_2, r_in=SEG_3, a_in=(targRelPos - v1)[0], b_in=(targRelPos - v1)[1], c_in=(targRelPos - v1)[2], theta_in=pi)
-
+    v2 = getSphereIntersection(R_in=SEG_2, r_in=SEG_3, a_in=(
+        targRelPos - v1)[0], b_in=(targRelPos - v1)[1], c_in=(targRelPos - v1)[2], theta_in=pi)
     # get v3 (vector from the tip of stage 2 to tip of stage 3) and set corresponding angles
     v3 = targRelPos - (v1 + v2)
 
@@ -201,7 +150,8 @@ def calculateTargetAngles(servoDict, targetRelPos):
     v3_len = v3.norm().evalf()
 
     # Length of v1 == Length of the first segment
-    assert v1_len == sqrt(CALIBRATE["seg1"]["x"]**2 + CALIBRATE["seg1"]["y"]**2 + CALIBRATE["seg1"]["z"]**2).evalf()
+    assert v1_len == sqrt(
+        CALIBRATE["seg1"]["x"]**2 + CALIBRATE["seg1"]["y"]**2 + CALIBRATE["seg1"]["z"]**2).evalf()
     # Length of v2 == Length of the second segment
     assert v2_len - SEG_2 < 0.001
     # Length of v2 == Length of the second segment
@@ -210,42 +160,56 @@ def calculateTargetAngles(servoDict, targetRelPos):
     assert (targRelPos - (v1 + v2 + v3)).norm() < 0.001
 
     def vec2angles(vec):
-        # theta:
+        # alpha:
         #   Description: the angle from the z-axis to vec
         #   Purpose: which servo combination best suits the second stage.
-        #   we wish to find a servo combination such that it's ifrst angle is as close to theta as possible
-        #   Note: v \dot [0; 0; 1] = |v| cos(theta) -> theta = acos(v/|v| \dot [0; 0; 1])
-        theta = acos( (vec/vec.norm()).dot(Matrix([0, 0, 1])) )
-        theta = math.degrees(theta)
+        #   we wish to find a servo combination such that it's ifrst angle is as close to alpha as possible
+        #   Note: v \dot [0; 0; 1] = |v| cos(alpha) -> alpha = acos(v/|v| \dot [0; 0; 1])
+        alpha = acos((vec/vec.norm()).dot(Matrix([0, 0, 1])))
+        alpha = math.degrees(alpha)
 
-        # phi:
+        # beta:
         #   Description: the angle from the x-axis to vec projected onto the x-y axis
         #   Purpose: which servo combination best suits the second stage.
-        #   we wish to find a servo combination such that it's second angle is as close to phi as possible
-        #   Note: [vec(0), vec(1), 0] \dot [1; 0; 0] = |[vec(0), vec(1), 0]| cos(phi) -> phi = acos([vec(0), vec(1), 0]/|[vec(0), vec(1), 0]| \dot [1; 0; 0])
-        phi = acos( ( Matrix([vec[0], vec[1], 0])/(Matrix([vec[0], vec[1], 0]).norm()) ).dot(Matrix([1, 0, 0])) )
-        phi = math.degrees(phi)
+        #   we wish to find a servo combination such that it's second angle is as close to beta as possible
+        #   Note: [vec(0), vec(1), 0] \dot [1; 0; 0] = |[vec(0), vec(1), 0]| cos(beta) -> beta = acos([vec(0), vec(1), 0]/|[vec(0), vec(1), 0]| \dot [1; 0; 0])
+        beta = acos((Matrix([vec[0], vec[1], 0]) /
+                     (Matrix([vec[0], vec[1], 0]).norm())).dot(Matrix([1, 0, 0])))
+        beta = math.degrees(beta)
 
-        # The dot product is always the closest angle between the two lines, therefore, it is always less than 180
-        # this is fine for theta, but we need the full ROM for 360 degrees
-        if(vec[0] < 0):
-            phi = 360 - phi
-        return theta, phi
+        # The dot product is always the closest angle between the two lines,
+        # however, say we have a vector that is just a littlebit counterclockwise of the z-axis, then
+        # we would want alpha to be denoted 359 degrees rather than 1 degree. Because 1 degree is already defined
+        # to be the thing a little bit clockwise of teh z-axis. Same goes for beta.
 
-    theta, phi = vec2angles(v2)
+        if(vec[1] < 0):
+            alpha = 360 - alpha
+        if(vec[1] < 0):
+            beta = 360 - beta
+        return alpha, beta
+
+    # Making sure our coordinate system makes sense, where a vector like [1, -1, 1] -> (alpha ~ 305, beta ~ 315)
+    v_test = Matrix([1, -1, 1])
+    alpha_test, beta_test = vec2angles(v_test)
+    assert (alpha_test - 305.3) < 0.1
+    assert (beta_test - 315.0) < 0.1
+
+    alpha, beta = vec2angles(v2)
 
     # servoAngle:
-    #  Description: the set of servo angles that most closely achieves [theta, phi]
+    #  Description: the set of servo angles that most closely achieves [alpha, beta]
     #  Purpose: which servo combination best suits the second stage.
-    #  we wish to find a servo combination such that it's angles are as close to [theta, phi] as possible
+    #  we wish to find a servo combination such that it's angles are as close to [alpha, beta] as possible
     #  loop through the key value pairs in the dictionary CALIBRATE['seg2']
     #  NOTE: In the future, we should find the closest servo angles by some type of lienar interpolation (our function is actualAngle -> servoAngle, which is R^2 -> R^2)
+    # the index of the servo angle that yields the closest actual angle to [alpha, beta]
+    minError = None  # {'index': 0, 'error': 1}
+    if(quadrant != "tr"):
+        raise Exception("quadrant is not tr")
 
-    # the index of the servo angle that yields the closest actual angle to [theta, phi]
-    minError = None # {'index': 0, 'error': 1}
-    for option, servoActualCombo in CALIBRATE["seg2"]["servoActualAngle"].items():
+    for option, servoActualCombo in CALIBRATE["seg2"][quadrant].items():
         actualAngle = servoActualCombo[1]
-        error = (actualAngle[0] - theta)**2 + (actualAngle[1] - phi)**2
+        error = (actualAngle[0] - alpha)**2 + (actualAngle[1] - beta)**2
         if minError == None:
             minError = {'index': option, 'error': error}
         else:
@@ -254,31 +218,42 @@ def calculateTargetAngles(servoDict, targetRelPos):
 
     # This is the ideal servo angle based on the actual servo angel that would be achieved
     # as a pair of tuples like htis [(180, 90), (71, 57)]
-    validCombo = CALIBRATE["seg2"]["servoActualAngle"][minError['index']]
+    validCombo = CALIBRATE["seg2"][quadrant][minError['index']]
+    # ideal servo angles
     servoAngles = validCombo[0]
+    # the actual angle outcome we would expect if we were to move to this servo angle
     actualAngles = validCombo[1]
     targetAngles[CALIBRATE["seg2"]["servoIdx"]] = {
         "lr": servoAngles[0],
         "ud": servoAngles[1]
     }
 
-    theta, phi = vec2angles(v3)
-    # the index of the servo angle that yields the closest actual angle to [theta, phi] AND the second segment's existing angle values
-    minError = None # {'index': 0, 'error': 1}
-    for option, servoActualCombo in CALIBRATE["seg3"]["servoActualAngle"].items():
+    alpha, beta = vec2angles(v3)
+    # move the third segment around until it's angle is as close to [alpha, beta] as possible
+    # use the visual last mile script to actually achieve this
+    '''
+    This code can be used IF we have calibration values for segment 3
+    Because it is probhitive to obtaint these values (and we're going to be adjusting the last segment anyways to get that <2cm precision),
+    we instead assume we only have calibration values for segment2
+    alpha, beta = vec2angles(v3)
+    # the index of the servo angle that yields the closest actual angle to [alpha, beta] AND the second segment's existing angle values
+    minError = None  # {'index': 0, 'error': 1}
+    for option, servoActualCombo in CALIBRATE["seg3"]["servoActualAngle"][quadrant].items():
         # servoActualCombo = [(180, 90), (71, 57), (33, 31)]
         seg2Calibrate = servoActualCombo[0]
         actualAngle = servoActualCombo[2]
         # the error betwenn the calibreated actual angle and the target actual angle
-        errorAngle = (actualAngle[0] - theta)**2 + (actualAngle[1] - phi)**2
+        errorAngle = (actualAngle[0] - alpha)**2 + (actualAngle[1] - beta)**2
         # Get the error between the calibrated servo angles for segment 2 and the actual servo angles of segment 2
-        errorSeg2 = (seg2Calibrate[0] - servoAngles[0])**2 + (seg2Calibrate[1] - servoAngles[1])**2
+        errorSeg2 = (seg2Calibrate[0] - servoAngles[0]
+                     )**2 + (seg2Calibrate[1] - servoAngles[1])**2
         error = errorAngle + errorSeg2
         if minError == None:
             minError = {'index': option, 'error': error}
         else:
             if error < minError['error']:
                 minError = {'index': option, 'error': error}
+    '''
 
     return targetAngles
 
@@ -313,12 +288,12 @@ def getSphereIntersection(R_in, r_in, a_in, b_in, c_in, theta_in):
 
     # radius: gets the radius of the circle intersection of the two spheres: https://mathworld.wolfram.com/Sphere-SphereIntersection.html
     radius = 1/(2*d)*sqrt(4*d**2*R**2 - (d**2 - r**2 + R**2)**2)
-    radius = radius.subs([(r, r_in), (R, R_in), (a, a_in), (b, b_in), (c, c_in)])
+    radius = radius.subs(
+        [(r, r_in), (R, R_in), (a, a_in), (b, b_in), (c, c_in)])
 
     # vector from the origin to the center of the circle intersection
     v = Matrix([a_in, b_in, c_in])
     v = (v/v.norm())*dist
-
 
     # The equation of the plane that is normal to this vector and also goes through this vector
     # Source: https://math.stackexchange.com/questions/753113/how-to-find-an-equation-of-the-plane-given-its-normal-vector-and-a-point-on-the
@@ -331,7 +306,8 @@ def getSphereIntersection(R_in, r_in, a_in, b_in, c_in, theta_in):
     # We want to generate two new "basis-vectors", q and s, for generating our circle around the intersection point
     # First, get a new point on the plane that is distinct from v
     inter = p + Matrix([1, 1, 0])
-    q = Matrix([inter[0], inter[1], plane_z.subs([(x, inter[0]), (y, inter[1])])])
+    q = Matrix([inter[0], inter[1], plane_z.subs(
+        [(x, inter[0]), (y, inter[1])])])
     # make q a vector perpendicular to v
     q = q - v
     q = q/q.norm()

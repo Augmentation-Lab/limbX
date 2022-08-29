@@ -3,22 +3,27 @@ CLASSES
 defines global classes
 """
 
+
 class Params():
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
 
 class TargetPos():
     def __init__(self, x=None, y=None, z=None):
         self.x = x
         self.y = y
         self.z = z
+
     def __str__(self):
         return f"TargetPos(x={self.x}, y={self.y}, z={self.z})"
+
 
 class GazePoint():
     def __init__(self, x=None, y=None):
         self.x = x
         self.y = y
+
 
 class TargetObj():
     # likely removing objLabel as part of the vision mechanism
@@ -28,6 +33,7 @@ class TargetObj():
         self.objLabel = objLabel
         self.relPos = relPos
         self.__dict__.update(kwargs)
+
 
 class SystemState():
     def __init__(self, **kwargs):
@@ -45,5 +51,3 @@ class SystemState():
             print("System initialized.")
             self.initialized = True
         return self.initialized
-
-# systemSTATE = SystemState()
