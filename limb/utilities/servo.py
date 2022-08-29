@@ -8,8 +8,8 @@ https://docs.onion.io/omega2-maker-kit/maker-kit-servo-controlling-servo.html
 from time import sleep
 from collections import defaultdict
 import math
-from adafruit_servokit import ServoKit
-kit = ServoKit(channels=16)
+#from adafruit_servokit import ServoKit
+#kit = ServoKit(channels=16)
 
 
 class Servo:
@@ -22,7 +22,7 @@ class Servo:
         self.maxAngle = maxAngle
         self.currentAngle = defaultAngle
         self.defaultAngle = defaultAngle
-        kit.servo[self.pin].angle = defaultAngle
+        #kit.servo[self.pin].angle = defaultAngle
 
     def __repr__(self):
         return (f"Servo {self.name} on pin {self.pin} at angle {self.currentAngle}")
@@ -56,9 +56,9 @@ class Servo:
                 intermediateAngle += angleMovePerFrame
             else:
                 intermediateAngle -= angleMovePerFrame
-            kit.servo[self.pin].angle = intermediateAngle
+            #kit.servo[self.pin].angle = intermediateAngle
             sleep(frameTime)
-        kit.servo[self.pin].angle = angle
+        #kit.servo[self.pin].angle = angle
         self.currentAngle = angle
         sleep(0.2)
 

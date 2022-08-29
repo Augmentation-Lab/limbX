@@ -8,13 +8,14 @@ from utilities.classes import TargetPos
 from sympy import *
 from utilities import servo, smart, hand
 import utilities.servoDict as servoDict
+from utilities.keyboard import controlWithKeyboard
 # INITIALIZATION
 
 
 def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False, demoMoveTo=False):
     systemSTATE = servoDict.initialize()
     if demoMoveAround:
-        demoMoveAround(systemSTATE)
+        controlWithKeyboard(systemSTATE)
     if demoExploreWorkspace:
         # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
         print("exploreWorkspace()")
@@ -82,4 +83,4 @@ def demoMoveAround(systemSTATE):
             sleep(1)
 
 
-demo(demoMoveTo=True)
+demo(demoMoveAround=True, demoMoveTo=True)

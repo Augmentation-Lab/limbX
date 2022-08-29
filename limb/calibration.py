@@ -5,7 +5,7 @@ from collections import defaultdict
 import yaml
 import pyperclip
 import utilities.servoDict as servoDictFunc
-
+from utilities.keyboard import controlWithKeyboard
 with open("limb/config.yml") as f:
     calibrationConfig = yaml.safe_load(f)['calibrationDict']
 with open("limb/calibration.yml") as f:
@@ -146,39 +146,9 @@ print("Calibration Step #4")
 print("We will now begin measuring the angles of the second segment")
 
 
-def controlWithKeyboard():
-    while True:
-        command = input("Ardayf.io $ ")
-        if command == "exit":
-            break
-        elif len(command) == 0:
-            continue
-        elif command == "help":
-            print("""Exmaple command:
-1 45 45 corresponds to move the first segment to 45 degrees in the lr direction and 45 degrees in the ud direction
-central 30 corresponds to move the central servo to 30 degrees)""")
-            continue
-        # check if the command consists entirely of special characters
-        try:
-            command = command.split(" ")
-            segment = command[0]
-            if segment == "central":
-                angle = float(command[1])
-                servo.batchSetAngles(systemSTATE.servoDict, {calibrationConfig['central']['servoIdx']: {
-                    "central": angle
-                }})
-            else:
-                servoLR = float(command[1])
-                servoUD = float(command[2])
-                servo.batchSetAngles(systemSTATE.servoDict, {calibrationConfig['seg' + segment]["servoIdx"]: {
-                    "lr": servoLR, "ud": servoUD}})
-        except Exception as e:
-            print(f"Invalid command: {e}")
-
-
 seg2Config = calibrationConfig['seg2']
 # All the possible real world angles we want to test for
-targetAngles = [(45, 0), (90, 0)]  # , (90, 0), (0, 45), (0, 90), (45, 45)]
+targetAngles = [(45, 0), (90, 0), (0, 45), (0, 90), (45, 45)]
 servoAnglesDir = {'tr': {}, 'bl': {}, 'tl': {}, 'br': {}}
 for quadrant in servoAnglesDir.keys():
     count = 0
@@ -187,9 +157,8 @@ for quadrant in servoAnglesDir.keys():
             confirm = input(
                 f"Move the tip of segment 2 until it reaches the following angle pair: (alpha={anglePair[0]}, beta={anglePair[1]}). Press enter to continue: ")
 
-            ### SANDBOX ALLOW MOVEMENT ###
+            # Sandbox to allow the user to move about
             controlWithKeyboard()
-            ### SANDBOX ALLOW MOVEMENT ###
             servoAngles = input(
                 f"What angle pair for the servo would you like for target angles (alpha={anglePair[0]}, beta={anglePair[1]})? (e.g. '45 30'): ")
             servoAngles = [servoAngles.split(

@@ -4,6 +4,14 @@ calculates control sequences
 """
 from sympy import *
 import math
+import yaml
+import utilities.servoDict as servoDictFunc
+
+with open("limb/config.yml") as f:
+    calibrationConfig = yaml.safe_load(f)['calibrationDict']
+with open("limb/calibration.yml") as f:
+    calibrationData = yaml.safe_load(f)
+systemSTATE = servoDictFunc.initialize()
 
 # Lenghts of the segments in meters
 SEG_2 = 1
@@ -88,47 +96,47 @@ def calculateTargetAngles(servoDict, targetRelPos):
         """
         # top right quadrant
         if(targetRelPos.x >= 0 and targetRelPos.z >= 0):
-            v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
-                        ["y"], CALIBRATE["seg1"]["z"]])
-            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
-                "central": CALIBRATE["central"]["tr"]}
-            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-                "lr": CALIBRATE["seg1"]["preset"]["lr"],
-                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            v1 = Matrix([calibrationData["seg1"]["x"],
+                        calibrationData["seg1"]["y"], calibrationData["seg1"]["z"]])
+            targetAngles[calibrationConfig["central"]["servoIdx"]] = {
+                "central": calibrationData["central"]["tr"]}
+            targetAngles[calibrationConfig["seg1"]["servoIdx"]] = {
+                "lr": calibrationData["seg1"]["preset"]["lr"],
+                "ud": calibrationData["seg1"]["preset"]["ud"]
             }
             quadrant = "tr"
         # bottom right quadrant
         elif(targetRelPos.x >= 0 and targetRelPos.z < 0):
-            v1 = Matrix([CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
-                        ["y"], -CALIBRATE["seg1"]["z"]])
+            v1 = Matrix([calibrationData["seg1"]["x"], calibrationData["seg1"]
+                        ["y"], -calibrationData["seg1"]["z"]])
 
-            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
-                "central": CALIBRATE["central"]["br"]}
-            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-                "lr": CALIBRATE["seg1"]["preset"]["lr"],
-                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            targetAngles[calibrationConfig["central"]["servoIdx"]] = {
+                "central": calibrationData["central"]["br"]}
+            targetAngles[calibrationConfig["seg1"]["servoIdx"]] = {
+                "lr": calibrationData["seg1"]["preset"]["lr"],
+                "ud": calibrationData["seg1"]["preset"]["ud"]
             }
             quadrant = "br"
         # top left quadrant
         elif(targetRelPos.x < 0 and targetRelPos.z >= 0):
-            v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
-                        ["y"], CALIBRATE["seg1"]["z"]])
-            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
-                "central": CALIBRATE["central"]["tl"]}
-            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-                "lr": CALIBRATE["seg1"]["preset"]["lr"],
-                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            v1 = Matrix([-calibrationData["seg1"]["x"], calibrationData["seg1"]
+                        ["y"], calibrationData["seg1"]["z"]])
+            targetAngles[calibrationConfig["central"]["servoIdx"]] = {
+                "central": calibrationData["central"]["tl"]}
+            targetAngles[calibrationConfig["seg1"]["servoIdx"]] = {
+                "lr": calibrationData["seg1"]["preset"]["lr"],
+                "ud": calibrationData["seg1"]["preset"]["ud"]
             }
             quadrant = "tl"
         # bottom left quadrant
         elif(targetRelPos.x < 0 and targetRelPos.z < 0):
-            v1 = Matrix([-CALIBRATE["seg1"]["x"], CALIBRATE["seg1"]
-                        ["y"], -CALIBRATE["seg1"]["z"]])
-            targetAngles[CALIBRATE["central"]["servoIdx"]] = {
-                "central": CALIBRATE["central"]["bl"]}
-            targetAngles[CALIBRATE["seg1"]["servoIdx"]] = {
-                "lr": CALIBRATE["seg1"]["preset"]["lr"],
-                "ud": CALIBRATE["seg1"]["preset"]["ud"]
+            v1 = Matrix([-calibrationData["seg1"]["x"], calibrationData["seg1"]
+                        ["y"], -calibrationData["seg1"]["z"]])
+            targetAngles[calibrationConfig["central"]["servoIdx"]] = {
+                "central": calibrationData["central"]["bl"]}
+            targetAngles[calibrationConfig["seg1"]["servoIdx"]] = {
+                "lr": calibrationData["seg1"]["preset"]["lr"],
+                "ud": calibrationData["seg1"]["preset"]["ud"]
             }
             quadrant = "bl"
         else:
@@ -151,7 +159,7 @@ def calculateTargetAngles(servoDict, targetRelPos):
 
     # Length of v1 == Length of the first segment
     assert v1_len == sqrt(
-        CALIBRATE["seg1"]["x"]**2 + CALIBRATE["seg1"]["y"]**2 + CALIBRATE["seg1"]["z"]**2).evalf()
+        calibrationData["seg1"]["x"]**2 + calibrationData["seg1"]["y"]**2 + calibrationData["seg1"]["z"]**2).evalf()
     # Length of v2 == Length of the second segment
     assert v2_len - SEG_2 < 0.001
     # Length of v2 == Length of the second segment
@@ -200,14 +208,14 @@ def calculateTargetAngles(servoDict, targetRelPos):
     #  Description: the set of servo angles that most closely achieves [alpha, beta]
     #  Purpose: which servo combination best suits the second stage.
     #  we wish to find a servo combination such that it's angles are as close to [alpha, beta] as possible
-    #  loop through the key value pairs in the dictionary CALIBRATE['seg2']
+    #  loop through the key value pairs in the dictionary calibrationData['seg2']
     #  NOTE: In the future, we should find the closest servo angles by some type of lienar interpolation (our function is actualAngle -> servoAngle, which is R^2 -> R^2)
     # the index of the servo angle that yields the closest actual angle to [alpha, beta]
     minError = None  # {'index': 0, 'error': 1}
     if(quadrant != "tr"):
         raise Exception("quadrant is not tr")
 
-    for option, servoActualCombo in CALIBRATE["seg2"][quadrant].items():
+    for option, servoActualCombo in calibrationData["seg2"][quadrant].items():
         actualAngle = servoActualCombo[1]
         error = (actualAngle[0] - alpha)**2 + (actualAngle[1] - beta)**2
         if minError == None:
@@ -218,12 +226,12 @@ def calculateTargetAngles(servoDict, targetRelPos):
 
     # This is the ideal servo angle based on the actual servo angel that would be achieved
     # as a pair of tuples like htis [(180, 90), (71, 57)]
-    validCombo = CALIBRATE["seg2"][quadrant][minError['index']]
+    validCombo = calibrationData["seg2"][quadrant][minError['index']]
     # ideal servo angles
     servoAngles = validCombo[0]
     # the actual angle outcome we would expect if we were to move to this servo angle
     actualAngles = validCombo[1]
-    targetAngles[CALIBRATE["seg2"]["servoIdx"]] = {
+    targetAngles[calibrationConfig["seg2"]["servoIdx"]] = {
         "lr": servoAngles[0],
         "ud": servoAngles[1]
     }
@@ -238,7 +246,7 @@ def calculateTargetAngles(servoDict, targetRelPos):
     alpha, beta = vec2angles(v3)
     # the index of the servo angle that yields the closest actual angle to [alpha, beta] AND the second segment's existing angle values
     minError = None  # {'index': 0, 'error': 1}
-    for option, servoActualCombo in CALIBRATE["seg3"]["servoActualAngle"][quadrant].items():
+    for option, servoActualCombo in calibrationData["seg3"]["servoActualAngle"][quadrant].items():
         # servoActualCombo = [(180, 90), (71, 57), (33, 31)]
         seg2Calibrate = servoActualCombo[0]
         actualAngle = servoActualCombo[2]
