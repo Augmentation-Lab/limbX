@@ -9,27 +9,18 @@ servoPins:
 calibrationDict:
   {
     "central":
-      {
-        "servoIdx": 0,
-        "minAngle": 0,
-        "maxAngle": 180,
-        "angleInterval": 10,
-        "description":
-          "servoIdx: the index of the servos for that segment (the same as the key in config.yml)
-          minAngle-maxAngle: limits of the servo that we will even test
-          angleInterval: size of jumps to make between iterations",
-      },
+      { "servoIdx": 0, "minAngle": 90, "maxAngle": 180, "angleInterval": 10 },
     "seg1":
       {
         "servoIdx": 1,
-        "minAngle": { lr: 0, ud: 0 },
+        "minAngle": { lr: 90, ud: 90 },
         "maxAngle": { lr: 180, ud: 180 },
         "angleInterval": 20,
       },
     "seg2":
       {
         "servoIdx": 2,
-        "minAngle": { lr: 0, ud: 0 },
+        "minAngle": { lr: 90, ud: 90 },
         "maxAngle": { lr: 180, ud: 180 },
         "angleInterval": 20,
       },
