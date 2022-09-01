@@ -23,6 +23,7 @@ class Servo:
         self.currentAngle = defaultAngle
         self.defaultAngle = defaultAngle
         kit.servo[self.pin].angle = defaultAngle
+        sleep(2)
 
     def __repr__(self):
         return (f"Servo {self.name} on pin {self.pin} at angle {self.currentAngle}")
