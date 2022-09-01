@@ -1,5 +1,6 @@
 from . import servo
 import yaml
+import sleep
 with open("limb/config.yml") as f:
     calibrationConfig = yaml.safe_load(f)['calibrationDict']
 
@@ -9,6 +10,46 @@ def controlWithKeyboard(systemSTATE):
         command = input("Ardayf.io $ ")
         if command == "exit":
             break
+        elif command == "shimmy":
+            servo.batchSetAngles(systemSTATE.servoDict, {0: {
+                "central": 135
+            }, 1: {
+                "lr": 135,
+                "ud": 135
+            }, 2: {
+                "lr": 135,
+                "ud": 135
+            }})
+            sleep(5)
+            servo.batchSetAngles(systemSTATE.servoDict, {0: {
+                "central": 135
+            }, 1: {
+                "lr": 90,
+                "ud": 90
+            }, 2: {
+                "lr": 90,
+                "ud": 90
+            }})
+            sleep(5)
+            servo.batchSetAngles(systemSTATE.servoDict, {0: {
+                "central": 135
+            }, 1: {
+                "lr": 135,
+                "ud": 135
+            }, 2: {
+                "lr": 135,
+                "ud": 135
+            }})
+            sleep(5)
+            servo.batchSetAngles(systemSTATE.servoDict, {0: {
+                "central": 135
+            }, 1: {
+                "lr": 180,
+                "ud": 180
+            }, 2: {
+                "lr": 180,
+                "ud": 180
+            }})
         elif len(command) == 0:
             continue
         elif command == "help":
