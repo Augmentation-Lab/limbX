@@ -1,6 +1,6 @@
 from . import servo
 import yaml
-import sleep
+from time import sleep
 with open("limb/config.yml") as f:
     calibrationConfig = yaml.safe_load(f)['calibrationDict']
 
