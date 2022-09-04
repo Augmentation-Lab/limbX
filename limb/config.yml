@@ -24,4 +24,5 @@ calibrationDict:
         "maxAngle": { lr: 180, ud: 180 },
         "angleInterval": 20,
       },
+    "seg3": { "servoIdx": 3 },
   }

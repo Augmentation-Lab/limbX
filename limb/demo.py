@@ -19,20 +19,6 @@ def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoR
     if demoExploreWorkspace:
         # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
         print("exploreWorkspace()")
-    if demoGrab:
-        print("grab()")
-        hand.grab()
-    if demoRelease:
-        print("release()")
-        hand.release()
-    if demoWaveHello:
-        # implement later
-        print("waveHello()")
-        servo.batchSetAngles(systemSTATE.servoDict, {
-            0: {
-                "central": 135,
-            },
-        })
     if demoMoveTo:
         # position relative ot the central servo
         target = TargetPos(2, 1, 3)
@@ -83,4 +69,4 @@ def demoMoveAround(systemSTATE):
             sleep(1)
 
 
-demo(demoMoveAround=True, demoMoveTo=True)
+demo(demoMoveAround=True)  # , demoMoveTo=True)

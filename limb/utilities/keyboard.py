@@ -1,4 +1,5 @@
 from . import servo
+from . import hand
 import yaml
 from time import sleep
 with open("limb/config.yml") as f:
@@ -10,6 +11,10 @@ def controlWithKeyboard(systemSTATE):
         command = input("Ardayf.io $ ")
         if command == "exit":
             break
+        elif command == "grab":
+            hand.release()
+        elif command == "release":
+            hand.release()
         elif command == "shimmy":
             servo.batchSetAngles(systemSTATE.servoDict, {0: {
                 "central": 135
