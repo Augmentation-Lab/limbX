@@ -44,7 +44,7 @@ seg3:
 """
 How Calibration Should Work:
 1. The central servo spins around and you stop it when it's real angle is
--45 degrees, 45 degrees, 135 degrees, and 225 degrees from horizontal (270 degrees total)
+-45 degrees, 45 degrees, 135 degrees, and 225 degrees from horizontal (270 degrees total), where angle 0 is at the negative x-axis and we start clockwise
 
 2. The first segment crunches until you tell it to stop. This is quadrant independent. This is the "curnch"
 of the first segment throughout all quadrants (i.e. it has this "crunch" at -45, 45, 135, and 225 degrees)
@@ -81,8 +81,8 @@ print("We will now begin calibrating the central servo to find the angles at whi
 # Spin the centrla servo between the min and max angle
 centralConfig = calibrationConfig['central']
 # The list of 4 servo angles at which we want our central servo to be at
-quadrants = {'bl': 0, 'tl': 0, 'tr': 0, 'br': 0}
-associated_angle = {'bl': -45, 'tl': 45, 'tr': 135, 'br': 225}
+quadrants = {'br': 0, 'tr': 0, 'tl': 0, 'bl': 0}
+associated_angle = {'br': -45, 'tr': 45, 'tl': 135, 'bl': 225}
 quad_keys = list(quadrants.keys())
 confirm_no = 0
 for testAngle in range(centralConfig['minAngle'], centralConfig['maxAngle'] + 1, centralConfig['angleInterval']):
