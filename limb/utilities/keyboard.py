@@ -11,10 +11,14 @@ def controlWithKeyboard(systemSTATE):
         command = input("Ardayf.io $ ")
         if command == "exit":
             break
+        elif len(command) == 0:
+            continue
         elif command == "grab":
             hand.release()
         elif command == "release":
             hand.release()
+        elif command == "straight":
+            servo.setAllAngles(systemSTATE.servoDict, 135)
         elif command == "shimmy":
             servo.batchSetAngles(systemSTATE.servoDict, {0: {
                 "central": 135
@@ -25,9 +29,9 @@ def controlWithKeyboard(systemSTATE):
                 "lr": 135,
                 "ud": 135
             }})
-            sleep(5)
+            sleep(2)
             servo.batchSetAngles(systemSTATE.servoDict, {0: {
-                "central": 135
+                "central": 70
             }, 1: {
                 "lr": 90,
                 "ud": 90
@@ -35,9 +39,9 @@ def controlWithKeyboard(systemSTATE):
                 "lr": 90,
                 "ud": 90
             }})
-            sleep(5)
+            sleep(2)
             servo.batchSetAngles(systemSTATE.servoDict, {0: {
-                "central": 135
+                "central": 200
             }, 1: {
                 "lr": 135,
                 "ud": 135
@@ -45,7 +49,7 @@ def controlWithKeyboard(systemSTATE):
                 "lr": 135,
                 "ud": 135
             }})
-            sleep(5)
+            sleep(2)
             servo.batchSetAngles(systemSTATE.servoDict, {0: {
                 "central": 135
             }, 1: {
@@ -55,13 +59,18 @@ def controlWithKeyboard(systemSTATE):
                 "lr": 180,
                 "ud": 180
             }})
-        elif len(command) == 0:
-            continue
         elif command == "help":
             print("""Exmaple command:
-1 45 45 corresponds to move the first segment to 45 degrees in the lr direction and 45 degrees in the ud direction
-central 30 corresponds to move the central servo to 30 degrees)""")
+$ 1 45 50
+    move the first segment to 45 degrees in the lr direction and 50 degrees in the ud direction
+central 30
+    move the central servo to 30 degrees
+grab
+release
+shimmy
+straight""")
             continue
+
         # check if the command consists entirely of special characters
         try:
             command = command.split(" ")
