@@ -2,6 +2,7 @@ from . import servo
 from . import hand
 import yaml
 from time import sleep
+
 with open("limb/config.yml") as f:
     calibrationConfig = yaml.safe_load(f)['calibrationDict']
 
@@ -61,29 +62,24 @@ def controlWithKeyboard(systemSTATE):
             }})
         elif command == "help":
             print("""Exmaple command:
-$ 1 45 50
-    move the first segment to 45 degrees in the lr direction and 50 degrees in the ud direction
-central 30
+$ 1 lr 50
+    move the first segment to 45 degrees in the lr direction
+$ 0 central 90
     move the central servo to 30 degrees
-grab
-release
-shimmy
-straight""")
+$ grab
+$ release
+$ shimmy
+$ straight""")
             continue
-
-        # check if the command consists entirely of special characters
-        try:
-            command = command.split(" ")
-            segment = command[0]
-            if segment == "central":
-                angle = float(command[1])
-                servo.batchSetAngles(systemSTATE.servoDict, {calibrationConfig['central']['servoIdx']: {
-                    "central": angle
+        else:
+            # check if the command consists entirely of special characters
+            try:
+                command = command.split(" ")
+                segment = command[0]
+                servoName = command[1]
+                angle = float(command[2])
+                servo.batchSetAngles(systemSTATE.servoDict, {segment: {
+                    servoName: angle
                 }})
-            else:
-                servoLR = float(command[1])
-                servoUD = float(command[2])
-                servo.batchSetAngles(systemSTATE.servoDict, {calibrationConfig['seg' + segment]["servoIdx"]: {
-                    "lr": servoLR, "ud": servoUD}})
-        except Exception as e:
-            print(f"Invalid command: {e}")
+            except Exception as e:
+                print(f"Invalid command: {e}")

@@ -12,10 +12,14 @@ from utilities.keyboard import controlWithKeyboard
 # INITIALIZATION
 
 
-def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoRelease=False, demoWaveHello=False, demoMoveTo=False):
+def demo(demoKeyboardControl=False, demoExploreWorkspace=False, demoMoveTo=False):
     systemSTATE = servoDict.initialize()
-    if demoMoveAround:
+    if demoKeyboardControl:
+        print("demoKeyboardControl()")
         controlWithKeyboard(systemSTATE)
+    if demoMoveAround:
+        print("demoMoveAround()")
+        demoMoveAround(systemSTATE)
     if demoExploreWorkspace:
         # implement later: moveTo spherical points within workspace, via producing all combinations of angles given numSegments
         print("exploreWorkspace()")
@@ -35,15 +39,15 @@ def demo(demoMoveAround=False, demoExploreWorkspace=False, demoGrab=False, demoR
 def demoMoveAround(systemSTATE):
     print("demoMoveAround()")
     anglesDict = {
-        "home": {"lr": 0, "bf": 0},
-        "left": {"lr": 90, "bf": 0},
-        "right": {"lr": -90, "bf": 0},
-        "up": {"lr": 0, "bf": 90},
-        "down": {"lr": 0, "bf": -90},
-        "upleft": {"lr": 90, "bf": 90},
-        "upright": {"lr": -90, "bf": 90},
-        "downleft": {"lr": 90, "bf": -90},
-        "downright": {"lr": -90, "bf": -90},
+        "home": {"lr": 0, "ud": 0},
+        "left": {"lr": 90, "ud": 0},
+        "right": {"lr": -90, "ud": 0},
+        "up": {"lr": 0, "ud": 90},
+        "down": {"lr": 0, "ud": -90},
+        "upleft": {"lr": 90, "ud": 90},
+        "upright": {"lr": -90, "ud": 90},
+        "downleft": {"lr": 90, "ud": -90},
+        "downright": {"lr": -90, "ud": -90},
     }
 
     movements = [
@@ -69,4 +73,4 @@ def demoMoveAround(systemSTATE):
             sleep(1)
 
 
-demo(demoMoveAround=True)  # , demoMoveTo=True)
+demo(demoKeyboardControl=True)  # , demoMoveTo=True)

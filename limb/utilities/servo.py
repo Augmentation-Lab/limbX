@@ -28,7 +28,7 @@ class Servo:
     def __repr__(self):
         return (f"Servo {self.name} on pin {self.pin} at angle {self.currentAngle}")
 
-    # Speed is in degrees/second
+    # Speed is in degrees/second. The hardware is limited to about 400 degrees/second without a load.
     def setAngle(self, angle, speed=135):
         print(
             f"setAngle(servo_name={self.name}, servo_pin={self.pin}, angle={angle})")
@@ -61,7 +61,6 @@ class Servo:
             sleep(frameTime)
         kit.servo[self.pin].angle = angle
         self.currentAngle = angle
-        sleep(0.2)
 
 
 def initialize(servoPins):
