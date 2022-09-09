@@ -98,9 +98,10 @@ for testAngle in range(centralConfig['minAngle'], centralConfig['maxAngle'] + 1,
         confirm_no += 1
     if confirm_no == 4:
         break
-'''
+
 if(confirm_no != 4):
     assert False
+'''
 
 new_calibration['central'] = quadrants
 print("---- calibration.yml ----")
