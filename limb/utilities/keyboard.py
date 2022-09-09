@@ -75,7 +75,7 @@ $ straight""")
             # check if the command consists entirely of special characters
             try:
                 command = command.split(" ")
-                segment = command[0]
+                segment = int(command[0])
                 servoName = command[1]
                 angle = float(command[2])
                 servo.batchSetAngles(systemSTATE.servoDict, {segment: {

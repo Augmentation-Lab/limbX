@@ -29,7 +29,7 @@ class Servo:
         return (f"Servo {self.name} on pin {self.pin} at angle {self.currentAngle}")
 
     # Speed is in degrees/second. The hardware is limited to about 400 degrees/second without a load.
-    def setAngle(self, angle, speed=135):
+    def setAngle(self, angle, speed=90):
         print(
             f"setAngle(servo_name={self.name}, servo_pin={self.pin}, angle={angle})")
         # check against max and min angles
