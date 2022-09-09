@@ -102,7 +102,8 @@ if(confirm_no != 4):
     assert False
 
 new_calibration['central'] = quadrants
-
+print("---- calibration.yml ----")
+print(new_calibration)
 
 """
 STEP #2 and #3
@@ -110,10 +111,14 @@ STEP #2 and #3
 print("Calibration Steps #2 and #3")
 print("We will now begin measuring the 'crunch' in the first segment. We will then measure the tip position")
 
+
 seg1Config = calibrationConfig['seg1']
+'''
 isMeasured = False
+
 for testAngleLR in range(seg1Config['minAngle']['lr'], seg1Config['maxAngle']['lr'] + 1, seg1Config['angleInterval']):
     for testAngleUD in range(seg1Config['minAngle']['ud'], seg1Config['maxAngle']['ud'] + 1, seg1Config['angleInterval']):
+
         servo.batchSetAngles(systemSTATE.servoDict, {seg1Config['servoIdx']: {
             "lr": testAngleLR,
             "ud": testAngleUD
@@ -130,14 +135,25 @@ for testAngleLR in range(seg1Config['minAngle']['lr'], seg1Config['maxAngle']['l
 
 if not isMeasured:
     assert isMeasured
+'''
+confirm = input(
+    f"Move the lr/ud servo angles until the tip of segment 1 is in a satisfactory position (likely able to reach most objects)? . Press enter to continue: ")
+controlWithKeyboard()
+testAngles = input(
+    f"At what angle measures was this achieved? (e.g. 1 3)")
+measures = input(
+    f"What is the vector (in meters) from the base of the central servo to the tip of segment 1? (e.g. 1 3 1)")
 
 new_calibration['seg1'] = {}
 new_calibration['seg1']['x'] = int(measures.split(" ")[0])
 new_calibration['seg1']['y'] = int(measures.split(" ")[1])
 new_calibration['seg1']['z'] = int(measures.split(" ")[2])
 
-new_calibration['seg1']['preset'] = {"lr": testAngleLR, "ud": testAngleUD}
+new_calibration['seg1']['preset'] = {
+    "lr": testAngles.split(" ")[0], "ud": testAngles.split(" ")[1]}
 
+print("---- calibration.yml ----")
+print(new_calibration)
 
 """
 Step #4
@@ -174,6 +190,7 @@ for quadrant in servoAnglesDir.keys():
             print(f"Invalid command: {e}")
 
 new_calibration['seg2'] = servoAnglesDir
+print("---- calibration.yml ----")
 print(new_calibration)
 pyperclip.copy(str(new_calibration))
 servo.shutdown(systemSTATE.servoDict)
