@@ -85,6 +85,7 @@ quadrants = {'br': 0, 'tr': 0, 'tl': 0, 'bl': 0}
 associated_angle = {'br': -45, 'tr': 45, 'tl': 135, 'bl': 225}
 quad_keys = list(quadrants.keys())
 confirm_no = 0
+'''
 for testAngle in range(centralConfig['minAngle'], centralConfig['maxAngle'] + 1, centralConfig['angleInterval']):
     servo.batchSetAngles(systemSTATE.servoDict, {centralConfig['servoIdx']: {
         "central": testAngle
@@ -97,7 +98,7 @@ for testAngle in range(centralConfig['minAngle'], centralConfig['maxAngle'] + 1,
         confirm_no += 1
     if confirm_no == 4:
         break
-
+'''
 if(confirm_no != 4):
     assert False
 
@@ -113,32 +114,9 @@ print("We will now begin measuring the 'crunch' in the first segment. We will th
 
 
 seg1Config = calibrationConfig['seg1']
-'''
-isMeasured = False
-
-for testAngleLR in range(seg1Config['minAngle']['lr'], seg1Config['maxAngle']['lr'] + 1, seg1Config['angleInterval']):
-    for testAngleUD in range(seg1Config['minAngle']['ud'], seg1Config['maxAngle']['ud'] + 1, seg1Config['angleInterval']):
-
-        servo.batchSetAngles(systemSTATE.servoDict, {seg1Config['servoIdx']: {
-            "lr": testAngleLR,
-            "ud": testAngleUD
-        }})
-        confirm = input(
-            f"At lr/ud servo angles ({testAngleLR}, {testAngleUD}), is the tip of segment 1 in a satisfactory position (likely able to reach most objects)? (y/n): ")
-        if confirm in ["y", "Y"]:
-            isMeasured = True
-            measures = input(
-                "What is the vector (in meters) from the base of the central servo to the tip of segment 1? (e.g. 1 3 1) ")
-            break
-    if isMeasured:
-        break
-
-if not isMeasured:
-    assert isMeasured
-'''
 confirm = input(
     f"Move the lr/ud servo angles until the tip of segment 1 is in a satisfactory position (likely able to reach most objects)? . Press enter to continue: ")
-controlWithKeyboard()
+controlWithKeyboard(systemSTATE)
 testAngles = input(
     f"At what angle measures was this achieved? (e.g. 1 3)")
 measures = input(
@@ -174,7 +152,7 @@ for quadrant in servoAnglesDir.keys():
                 f"Move the tip of segment 2 until it reaches the following angle pair: (alpha={anglePair[0]}, beta={anglePair[1]}). Press enter to continue: ")
 
             # Sandbox to allow the user to move about
-            controlWithKeyboard()
+            controlWithKeyboard(systemSTATE)
             servoAngles = input(
                 f"What angle pair for the servo would you like for target angles (alpha={anglePair[0]}, beta={anglePair[1]})? (e.g. '45 30'): ")
             servoAngles = [servoAngles.split(
