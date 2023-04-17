@@ -14,15 +14,17 @@ kit = ServoKit(channels=16)
 
 class Servo:
     def __init__(self, name, pin, minAngle=0, maxAngle=270, defaultAngle=135):
+        self.currentAngle = kit.servo[self.pin].angle
+        self.startingAngle = self.currentAngle
         print(
-            f"Initializing servo {name} on pin {pin} at {defaultAngle} degrees")
+            f"Initializing servo {name} on pin {pin}. Hardware at 0 degrees, servo currently at {self.startingAngle} degrees.")
         self.name = name
         self.pin = pin
         self.minAngle = minAngle
         self.maxAngle = maxAngle
-        self.currentAngle = defaultAngle
+        # self.currentAngle = defaultAngle
         self.defaultAngle = defaultAngle
-        kit.servo[self.pin].angle = defaultAngle
+        # kit.servo[self.pin].angle = defaultAngle
         sleep(2)
 
     def __repr__(self):
@@ -45,7 +47,7 @@ class Servo:
         # We will move, in total, 35/4 times
         # We round this down to 8 times, with 1 on the end where we move the remaining distance
 
-        angleDiff = angle - self.currentAngle
+        angleDiff = angle + self.startingAngle - self.currentAngle
         frameTime = 0.1
         angleMovePerFrame = frameTime * speed
         intermediateAngle = self.currentAngle
@@ -59,8 +61,8 @@ class Servo:
                 intermediateAngle -= angleMovePerFrame
             kit.servo[self.pin].angle = intermediateAngle
             sleep(frameTime)
-        kit.servo[self.pin].angle = angle
-        self.currentAngle = angle
+        kit.servo[self.pin].angle = angle + self.startingAngle
+        self.currentAngle = angle + self.startingAngle
 
 
 def initialize(servoPins):
