@@ -14,12 +14,12 @@ kit = ServoKit(channels=16)
 
 class Servo:
     def __init__(self, name, pin, minAngle=0, maxAngle=270, defaultAngle=135):
+        self.pin = pin
         self.currentAngle = kit.servo[self.pin].angle
         self.startingAngle = self.currentAngle
         print(
             f"Initializing servo {name} on pin {pin}. Hardware at 0 degrees, servo currently at {self.startingAngle} degrees.")
         self.name = name
-        self.pin = pin
         self.minAngle = minAngle
         self.maxAngle = maxAngle
         # self.currentAngle = defaultAngle
