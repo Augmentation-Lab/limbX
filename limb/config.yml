@@ -9,7 +9,7 @@ servoPins:
 calibrationDict:
   {
     "central":
-      { "servoIdx": 0, "minAngle": 90, "maxAngle": 180, "angleInterval": 10 },
+      { "servoIdx": 0, "minAngle": 0, "maxAngle": 270, "angleInterval": 10 },
     "seg1":
       {
         "servoIdx": 1,

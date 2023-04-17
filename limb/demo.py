@@ -12,7 +12,7 @@ from utilities.keyboard import controlWithKeyboard
 # INITIALIZATION
 
 
-def demo(demoKeyboardControl=False, demoExploreWorkspace=False, demoMoveTo=False):
+def demo(demoKeyboardControl=False, demoExploreWorkspace=False, demoMoveAround=False, demoMoveTo=False):
     systemSTATE = servoDict.initialize()
     if demoKeyboardControl:
         print("demoKeyboardControl()")
@@ -73,4 +73,5 @@ def demoMoveAround(systemSTATE):
             sleep(1)
 
 
+# demo(demoMoveAround=True)
 demo(demoKeyboardControl=True)  # , demoMoveTo=True)
