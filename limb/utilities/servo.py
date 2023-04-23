@@ -59,6 +59,7 @@ class Servo:
                 intermediateAngle += angleMovePerFrame
             else:
                 intermediateAngle -= angleMovePerFrame
+            print("currAngle", kit.servo[self.pin].angle)
             kit.servo[self.pin].angle = intermediateAngle
             sleep(frameTime)
         kit.servo[self.pin].angle = angle

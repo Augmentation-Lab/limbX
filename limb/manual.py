@@ -1,13 +1,18 @@
 from gpiozero import MCP3008
 import RPi.GPIO as GPIO
 import time
+import utilities.servoDict as servoDict
+from utilities import servo
+systemSTATE = servoDict.initialize()
 
 # GLOBAL VARIABLES
+# Largest joystick range produces this angle of movement
+fullMove = 1
 # General variables
 segment = 0 #segment that you are controlling
 running = True # for testing purposes
 # magnet pins
-magnetpin = 26
+magnetpin = 19
 butt_pin = 6 # for magnet button
 # controller pins
 x_pin = 2
@@ -37,55 +42,67 @@ def switching_states(): # check this, not very precise!
 	s1_val = round(s1.value)
 	s2_val = round(s2.value)
 	if s1_val == 0 and s2_val == 0: 
-		segment = 1
-	elif s1_val == 1:
-		segment = 0
-	elif s2_val == 1: 
 		segment = 2
+	elif s1_val == 1:
+		segment = 1
+	elif s2_val == 1: 
+		segment = 3
 	else:
-		segment = 0
+		segment = 1
 		
 	return segment
 	
-def base_rotate():
-	pass
-	
-def moving_limb(state, x_val, y_val, sel):
-	pass
+def base_rotate(p_val):
+	print("debug:", {0: {"central": p_val*360}})
+	# servo.batchSetAngles(systemSTATE.servoDict, {0: {"central": (p_val*270)-135}})
+
+def moving_limb(segment, x_val, y_val):
+	x_movePerc = x_val - 0.5 if abs(x_val - 0.5) > 0.1 else 0
+	y_movePerc = y_val - 0.5 if abs(y_val - 0.5) > 0.1 else 0
+	if abs(x_movePerc + y_movePerc) > 0:
+		angleChange = {"lr": x_movePerc*fullMove, "ud": y_movePerc*fullMove}
+		print("angleChange:", angleChange)
+		for axis in ["lr", "ud"]:
+			print("dsjklfjds:", segment)
+			print("debug:", {segment: {axis: float(systemSTATE.servoDict[segment][axis].currentAngle + angleChange[axis])}})
+			servo.batchSetAngles(systemSTATE.servoDict, {segment: {axis: float(systemSTATE.servoDict[segment][axis].currentAngle + angleChange[axis])}})
 
 # This controls the magnet based on whether the button is pressed.
 def magnet_on_off():
-	pass
-	#print(butt.value)
-	#GPIO.output(magnetpin,True)
-	
-	#if butt.value == 1.0:
-	#	GPIO.output(magnetpin, True)
-		
-	#else: 
+	print("debug", butt.value)
+	if butt.value == 1.0:
+		GPIO.output(magnetpin, True)
+	else: 
 		GPIO.output(magnetpin,False)
 		
 ## EXECUTION + LOGIC ## 
+vx_val = 0
+vy_val = 0
 try:
 	while running:
 		## Segment
 		seg = switching_states() ## this sets the segment that we want to control. 
 		
-		## BASE
-		base_val = potentionmeter.value
-		# print(base_val)
-		# base_rotate(base_val)
+		## Move base
+		# if abs(potentiometer.value - base_val) > 0.1:
+			# base_rotate(potentiometer.value)
+			
+		## POTENTIOMETER
+		# base_val = potentionmeter.value
+		
+		# Move limb
+		# print(vx.value)
+		# if abs(vx.value - vx_val) + abs(vy.value - vy_val) > 0.1:
+		moving_limb(seg, vx.value, vy.value)
 		
 		## JOYSTICK 
 		vx_val = vx.value
 		vy_val = vy.value
 		sel_val = sel.value	
-		# print("x:", vx_val, "y:", vy_val)
-		# moving_limb(seg, vx_val, vy_val, sel_val)
 		
-		# Controlling the Magnet
-		magnet_on_off()
-				
+		# Controlling tehe Magnet
+		#magnet_on_off()
+		
 		
 except KeyboardInterrupt(): # need this for GPIO control
 	GPIO.output(magnetpin,False) 
