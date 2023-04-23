@@ -2,4 +2,7 @@
 *.mp4
 *.avi
 *__pycache__
+<<<<<<< HEAD
 *.zip
+=======
+>>>>>>> c5ec4d786435e1112c389efcce971df279c69c86
