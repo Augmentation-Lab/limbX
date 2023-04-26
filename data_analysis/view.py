@@ -77,9 +77,6 @@ def play_single_video_on_loop(video_file_path):
         if not ret:
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
-    
-        # Rotate the frame by 180 degrees
-        frame = cv2.rotate(frame, cv2.ROTATE_180)
 
         cv2.imshow('Video', frame)
         if cv2.waitKey(25) & 0xFF == ord('q'):

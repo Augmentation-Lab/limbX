@@ -13,7 +13,6 @@ OUTPUT
 The output of this script is:
 1. A csv file containing the following data columns:
 -Video Filename
--Frame (first or last)
 -Servo1 Angle
 -Servo2 Angle
 -Servo3 Angle
@@ -21,39 +20,34 @@ The output of this script is:
 -Joint2 Position
 -Joint3 Position
 -EndEffector Position
--Seg1 Curvature
--Seg2 Curvature
--Seg3 Curvature
--End Curvature
 2. Video data files that contain analysis overlays, including joint markers, curvature lines, and a coordinate system grid.
 
 IMPLEMENTATION
 -Set configuration variables (directories, bounding box coordinates, blue detection range, real world measurements, etc.)
--Loop through video files and store the # of frames in each video in a list
--Concatenate all video files into one large file
--Crop and flip large video file
--Loop through frames in large video file and perform analysis
 For each frame:
+-Transform the video frame by cropping
 -Detect all blue objects
 -Identify Joint1, Joint2, Joint3, and EndEffector by finding the closest blue object to each previous point
+-Store this data in a pandas dataframe
 -Fit curvature 
 -Draw overlays for joint position, curvature, and coordinate system
--If the frame corresponds to the first or last frame of a smaller video file, store joint, curvature data in dataframe with corresponding video filename
 -Save the dataframe to a csv file
 
-If needed: use continuity to assist joint detection, via closeness nearby search
+If needed: use closeness / nearby search to distinguish joints
 """
 
 import cv2
 import os
 import numpy as np
+import view as v
+import math
 
 """
 DEFINE CONFIGURATION VARIABLES
 """
 
 # Set the directory where the videos are stored
-video_dir = "testvideodata/"
+input_dir = "testvideodata/"
 
 # Set the output directory for the cropped videos
 output_dir = "testvideodata_analyzed/"
@@ -92,6 +86,18 @@ def add_origin_marker(frame):
     cv2.line(frame, line_start, line_end, line_color, line_thickness)
 
     return frame
+
+def add_joint_markers(frame, joint_positions):
+    # print(joint_positions)
+        for joint, position in joint_positions.items():
+            # print("joint: ", joint, "position: ", position)
+            # Draw a bright red circle at the origin
+            radius = 3
+            color = (0, 0, 255)
+            thickness = -1
+            cv2.circle(frame, position, radius, color, thickness)
+            cv2.putText(frame, joint, (position[0] - 20, position[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+        return frame
 
 def add_coordinate_overlay(frame, aspect_ratio_scaled, grid_spacing=5):
     # Get the height and width of the frame
@@ -140,74 +146,124 @@ def crop_frame(frame, aspect_ratio_scaled):
     src = np.float32([top_left, top_right, bottom_left, bottom_right])
     dst = np.float32([(0, 0), (aspect_ratio_scaled[0], 0), (0, aspect_ratio_scaled[1]), aspect_ratio_scaled])
     M = cv2.getPerspectiveTransform(src, dst)
-    # src = np.float32([top_left, top_right, bottom_left, bottom_right])
-    # dst = np.float32([(0, 0), (aspect_ratio_scaled[0], 0), (0, aspect_ratio_scaled[1]), aspect_ratio_scaled])
-    # M = cv2.getPerspectiveTransform(src, dst)
 
     # Apply the perspective transform to the frame
     warped = cv2.warpPerspective(frame, M, aspect_ratio_scaled)
 
-    # Add the real-world coordinate system as an overlay
-    warped = add_coordinate_overlay(warped, aspect_ratio_scaled)
-
-    # Add origin marker
-    warped = add_origin_marker(warped)
-
     return warped
 
-# def setup_video(filename):
-#     # Load the video file
-#     cap = cv2.VideoCapture(filename)
+def add_overlays(frame, joint_positions, aspect_ratio_scaled):
+    # Add joint markers
+    frame = add_joint_markers(frame, joint_positions)
 
-#     # Check if the video file was opened successfully
-#     if not cap.isOpened():
-#         print("Error opening video file:", filename)
-#         return None, None, None, None
+    # Add the real-world coordinate system as an overlay
+    frame = add_coordinate_overlay(frame, aspect_ratio_scaled)
 
-#     # Get the total number of frames in the video
-#     num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # Add origin marker
+    frame = add_origin_marker(frame)
 
-#     # Get the dimensions of the video
-#     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    return frame
 
-#     # Scale up the aspect ratio to meet the current resolution
-#     aspect_ratio_scaled = (int(height * aspect_ratio[0] / aspect_ratio[1]), height)
+import pandas as pd
 
-#     # Create a VideoWriter object to save the cropped video
-#     out_filename = os.path.join(output_dir, os.path.splitext(os.path.basename(filename))[0] + ".avi")
-#     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-#     out = cv2.VideoWriter(out_filename, fourcc, 30.0, (aspect_ratio_scaled[0], aspect_ratio_scaled[1]))
+def extract_data(cropped_frame, filename, df):
+    # Convert the cropped frame to HSV color space
+    hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
 
-#     return aspect_ratio_scaled
+    # Define the lower and upper ranges of blue color in HSV color space
+    lower_blue = np.array([100, 100, 100])
+    upper_blue = np.array([140, 255, 255])
 
-# # Define the function to process the video frames
-# def process_video_frames(cap, num_frames, aspect_ratio_scaled, out, start_frame_idx):
-#     # Loop through all the frames in the video
-#     for frame_num in range(num_frames):
-#         # Read the next frame from the video
-#         ret, frame = cap.read()
+    # Threshold the cropped frame using the blue color range
+    mask = cv2.inRange(hsv, lower_blue, upper_blue)
 
-#         if not ret:
-#             break
-
-#         # Crop the frame
-#         cropped_frame = crop_frame(frame, aspect_ratio_scaled)
-
-#         # Write the frame to the output video file
-#         out.write(cropped_frame)
-
-#     # Release the video file and output video file
-#     cap.release()
-#     out.release()
+    # Find the contours of the blue objects in the binary image 
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-#     # Return the start frame index of the next video
-#     return start_frame_idx + num_frames
+    frame_size = cropped_frame.shape[:2]
+    # Filter out the contours that are within 10 pixels of the edge of the video
+    contours_filtered = []
+    for contour in contours:
+        if (contour[:, 0, 0] > 10).all() and (contour[:, 0, 0] < frame_size[1] - 10).all() and (contour[:, 0, 1] > 10).all() and (contour[:, 0, 1] < frame_size[0] - 10).all():
+            contours_filtered.append(contour)
+    contours = contours_filtered
 
-# Define the function to crop the video
-def process_video(filename):
+    # Sort the contours by size in descending order and take the largest three
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:4]
+    # Find center of mass of each contour as tuple of ints
+    joints = [tuple(map(int, np.mean(contour, axis=0)[0])) for contour in contours]
+    # # Visualize centers
+    # for center in joints:
+    #     cv2.circle(cropped_frame, tuple(map(int, center)), 3, (0, 0, 255), -1)
+
+    # Visualize the contours 
+    cropped_frame = cv2.drawContours(cropped_frame, contours, -1, (255, 0, 0), 3)
+
+    closest_points = {}
+    # Define a helper function to calculate the distance between two points
+    def distance(p1, p2):
+        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
+    # Define a list of joint labels
+    joint_labels = ["Joint1", "Joint2", "Joint3", "EndEffector"]
+
+    # Initialize an empty dictionary to store the joint positions
+    joint_positions = {}
+
+    # Find the joints in order
+    for i, label in enumerate(joint_labels):
+        if i == 0: # Joint1 is closest to the origin
+            joint_positions[label] = min(joints, key=lambda p: distance(p, (0, 205)))
+        else: # Find the closest joint that is not already labeled
+            joints.remove(joint_positions[joint_labels[i-1]])
+            joint_positions[label] = min(joints, key=lambda p: distance(p, joint_positions[joint_labels[i-1]]))
+
+    # Print the results
+    print(joint_positions)
+    closest_points = joint_positions
+
+    # # Find the closest contour point to the previous joint position for each joint
+    # distances = []
+    # for contour in contours:
+    #     for point in contour:
+    #         point = tuple(point[0])
+    #         distances.append((cv2.pointPolygonTest(contour, joint1, True), point))
+    #         distances.append((cv2.pointPolygonTest(contour, joint2, True), point))
+    #         distances.append((cv2.pointPolygonTest(contour, joint3, True), point))
+    #         distances.append((cv2.pointPolygonTest(contour, end_effector, True), point))
+
+    # closest_points = {}
+    # for joint in ["Joint1", "Joint2", "Joint3", "EndEffector"]:
+    #     # prev_joint = "Origin" if joint == "Joint1" else joint[:-1] + str(int(joint[-1]) - 1)
+    #     prev_joint = "Origin" if joint == "Joint1" else joint[:-1] + str(int(joint[-1]) - 1) if joint[-1].isdigit() else ""
+    #     prev_joint_pos = closest_points[prev_joint] if prev_joint in closest_points else (0, 205)
+    #     closest_points[joint] = min(distances, key=lambda x: abs(x[0]) if x[1] not in closest_points.values() else float('inf'))[1]
+    #     closest_points[joint] = tuple([int(x) for x in closest_points[joint]])
+    #     closest_points[joint] = tuple(map(sum, zip(closest_points[joint], prev_joint_pos)))
+    
+    # # Visualize the closest points
+    # for joint in closest_points:
+    #     cropped_frame = cv2.circle(cropped_frame, closest_points[joint], 5, (255, 0,0), -1)
+    #     cropped_frame = cv2.putText(cropped_frame, joint, (closest_points[joint][0] + 10, closest_points[joint][1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+
+    # Create a Pandas dataframe to store the joint position data
+    servo_angles = filename.split("_")
+    servo1_angle = servo_angles[1]
+    servo2_angle = servo_angles[3]
+    servo3_angle = servo_angles[5].split(".")[0]
+    data = {"Video Filename": filename, "Servo1 Angle": servo1_angle, "Servo2 Angle": servo2_angle, "Servo3 Angle": servo3_angle, "Joint1 Position": str(closest_points["Joint1"]), "Joint2 Position": str(closest_points["Joint2"]), "Joint3 Position": str(closest_points["Joint3"]), "EndEffector Position": str(closest_points["EndEffector"])}
+    new_row = pd.DataFrame(data, index=[0])
+
+    # print("df", df)
+    # Append the new row to the global dataframe
+    # df = df.append(new_row, ignore_index=True)
+
+    return df, closest_points, cropped_frame
+
+# Define the function to process the video
+def process_video(filename, df):
     # Load the video file
-    cap = cv2.VideoCapture(os.path.join(video_dir, filename))
+    cap = cv2.VideoCapture(os.path.join(input_dir, filename))
 
     # Check if the video file was opened successfully
     if not cap.isOpened():
@@ -229,6 +285,7 @@ def process_video(filename):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(out_filename, fourcc, 30.0, (aspect_ratio_scaled[0], aspect_ratio_scaled[1]))
 
+    joint_positions = {}
     # Loop through all the frames in the video
     for frame_num in range(num_frames):
         # Read the next frame from the video
@@ -239,69 +296,44 @@ def process_video(filename):
 
         # Crop the frame
         cropped_frame = crop_frame(frame, aspect_ratio_scaled)
-        print("frame", frame_num, "of", num_frames)
-
+        # if frame_num == 0:
+        #     print("First frame")
+        df, joint_positions, cropped_frame = extract_data(cropped_frame, filename, df)
+        if frame_num == 0:
+            print(joint_positions)
+        overlayed_frame = add_overlays(cropped_frame, joint_positions, aspect_ratio_scaled)
+        final_frame = overlayed_frame
         # Write the frame to the output video file
-        out.write(cropped_frame)
-    print("Done")
+        out.write(final_frame)
 
     # Release the video file and output video file
     cap.release()
     out.release()
+    return df, joint_positions
 
-process_video("seg1_60_seg2_0_seg3_0.avi")
+def sort_by_file_order(file_list):
+    # Sort the file list in place based on the order they were taken
+    file_list.sort(key=lambda x: (
+        int(x.split("_")[1]),  # sort by j value
+        int(x.split("_")[3]),  # then by i value
+        int(x.split("_")[5].split(".")[0])  # then by k value
+    ))
+    # reverse file list
+    file_list.reverse()
 
-# # Initialize the list to store start frames
-# start_frames = []
+    return file_list
 
-# # Loop through all the videos in the directory
-# for filename in sorted(os.listdir(video_dir)):
-#     if filename.endswith(".mp4") or filename.endswith(".avi"):
-#         # Load the video file
-#         cap = cv2.VideoCapture(os.path.join(video_dir, filename))
+df = pd.DataFrame(columns=["Video Filename", "Servo1 Angle", "Servo2 Angle", "Servo3 Angle", "Joint1 Position", "Joint2 Position", "Joint3 Position", "EndEffector Position"])
+# Loop through all the videos in the directory
+joint_positions = {}
+for filename in sort_by_file_order(os.listdir(input_dir)):
+        # Crop the video
+        print("Preprocessing:", filename)
+        df = process_video(filename, df)
 
-#         # Check if the video file was opened successfully
-#         if not cap.isOpened():
-#             print("Error opening video file:", filename)
-#             continue
-
-#         # Get the total number of frames in the video
-#         num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-#         # Get the dimensions of the video
-#         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-#         # Scale up the aspect ratio to meet the current resolution
-#         aspect_ratio_scaled = (int(height * aspect_ratio[0] / aspect_ratio[1]), height)
-
-#         # Calculate the perspective transform matrix
-#         src = np.float32([top_left, top_right, bottom_left, bottom_right])
-#         dst = np.float32([(0, 0), (aspect_ratio_scaled[0], 0), (0, aspect_ratio_scaled[1]), aspect_ratio_scaled])
-#         M = cv2.getPerspectiveTransform(src, dst)
-
-#         # Initialize the frame counter
-#         frame_count = 0
-
-#         # Loop through all the frames in the video
-#         for frame_num in range(num_frames):
-#             # Read the next frame from the video
-#             ret, frame = cap.read()
-
-#             if not ret:
-#                 break
-
-#             # Apply the perspective transform to the frame
-#             warped = cv2.warpPerspective(frame, M, aspect_ratio_scaled)
-
-#             # Add the real-world coordinate system as an overlay
-#             warped = add_coordinate_overlay(warped, aspect_ratio_scaled)
-            
-#             # Add origin marker
-#             warped = add_origin_marker(warped)
-
-#         # Release the video file
-#         cap.release()
-
-# Close all windows
+# Save the dataframe to a CSV file
+# df.to_csv("data.csv", index=False)
+print("All done.")
 cv2.destroyAllWindows()
+
+v.play_videos_from_directory(output_dir)

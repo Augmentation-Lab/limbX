@@ -15,3 +15,60 @@ EndEffector: 286,184
 Joint3: 249,199
 Joint2: 164,212
 Joint1: 77,202
+
+
+# ARCHIVED
+
+# def sort_by_file_order(file_list):
+#     # Sort the file list in place based on the order they were taken
+#     file_list.sort(key=lambda x: (
+#         int(x.split("_")[1]),  # sort by j value
+#         int(x.split("_")[3]),  # then by i value
+#         int(x.split("_")[5].split(".")[0])  # then by k value
+#     ))
+#     # reverse file list
+#     file_list.reverse()
+
+#     return file_list
+
+# def concat_data(video_files):
+    
+#     # Set up a loop to read each video file, extract its frames, and append them to a list of frames
+#     start_frame_numbers = [0]
+#     frames = []
+#     for video_file in video_files:
+#         print("Processing video file: " + video_file)
+#         video_path = os.path.join(input_dir, video_file)
+#         cap = cv2.VideoCapture(video_path)
+#         while cap.isOpened():
+#             ret, frame = cap.read()
+#             if not ret:
+#                 break
+#             frames.append(frame)
+#         cap.release()
+#         # Get the number of frames for the current video and calculate the start frame number for the next video
+#         num_frames = len(frames)
+#         next_start_frame = start_frame_numbers[-1] + num_frames
+#         start_frame_numbers.append(next_start_frame)
+
+#     # Concatenate the frames from all the videos together using cv2's vconcat() function
+#     concatenated_frames = cv2.vconcat(frames)
+#     print("Concatenated frames shape: " + str(concatenated_frames.shape))
+
+#     return concatenated_frames
+
+# def process_frames(frames):
+#     height = frames.shape[0]
+
+#     # Scale up the aspect ratio to meet the current resolution
+#     aspect_ratio_scaled = (int(height * aspect_ratio[0] / aspect_ratio[1]), height)
+    
+#     # Loop through all the frames in the video
+#     for frame in frames:
+
+#         # Crop the frame
+#         cropped_frame = crop_frame(frame, aspect_ratio_scaled)
+
+# file_list = sort_by_file_order(os.listdir(input_dir))
+# all_frames = concat_data(file_list)
+# process_frames(all_frames)
