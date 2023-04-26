@@ -57,6 +57,7 @@ top_right = (118, 61) # (456, 44)
 bottom_right = (100, 476) # (470, 474)
 top_left = (444, 51) # (130, 56)
 bottom_left = (460, 476) # (114, 466)
+origin = (0, 205)
 
 end_effector = (286,184)
 joint3 = (249,199)
@@ -87,7 +88,7 @@ def add_origin_marker(frame):
 
     return frame
 
-def add_joint_markers(frame, joint_positions):
+def add_joint_markers(frame, joint_positions, aspect_ratio_scaled):
     # print(joint_positions)
         for joint, position in joint_positions.items():
             # print("joint: ", joint, "position: ", position)
@@ -96,8 +97,22 @@ def add_joint_markers(frame, joint_positions):
             color = (0, 0, 255)
             thickness = -1
             cv2.circle(frame, position, radius, color, thickness)
-            cv2.putText(frame, joint, (position[0] - 20, position[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+            position_real = pixel_to_real(position, aspect_ratio_scaled, frame)
+            text = joint + ": (" + str(position_real[0]) + " in, " + str(position_real[1]) + " in)"
+            cv2.putText(frame, text, (position[0] - 20, position[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 255), 1, cv2.LINE_AA)
         return frame
+
+def pixel_to_real(pixel_coord, aspect_ratio_scaled, frame):
+    # Convert the pixel coordinates to real-world coordinates
+    x_real = pixel_coord[0] * (48 / frame.shape[1])
+    y_real = (pixel_coord[1] - 205) * (58.8 / frame.shape[0])
+    # y_real = pixel_coord[1] * (58.8 / frame.shape[0])
+
+    # Round the real-world coordinates to two decimal places
+    x_real = round(x_real, 2)
+    y_real = round(y_real, 2)
+
+    return (x_real, y_real)
 
 def add_coordinate_overlay(frame, aspect_ratio_scaled, grid_spacing=5):
     # Get the height and width of the frame
@@ -107,7 +122,7 @@ def add_coordinate_overlay(frame, aspect_ratio_scaled, grid_spacing=5):
     grid_img = np.zeros((height, aspect_ratio_scaled[0], 3), np.uint8)
 
     # Define the coordinate system origin in real-world coordinates
-    origin = (0, 202) # in inches
+    origin = (0, 205) # in inches
 
     # Define the x and y grid spacing in inches
     x_spacing = grid_spacing
@@ -121,7 +136,7 @@ def add_coordinate_overlay(frame, aspect_ratio_scaled, grid_spacing=5):
     for x in range(0, aspect_ratio_scaled[0], x_spacing_px):
         cv2.line(grid_img, (x, 0), (x, height), (255, 255, 255), 1)
         if x > 0:
-            cv2.putText(grid_img, str(int(origin[0] + x / (aspect_ratio_scaled[0] / 48))) + " in", (x - 20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(grid_img, str(int((origin[0] + x) / (aspect_ratio_scaled[0] / 48))) + " in", (x - 20, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
 
     # Draw the horizontal grid lines
     for y in range(0, height, y_spacing_px):
@@ -154,7 +169,7 @@ def crop_frame(frame, aspect_ratio_scaled):
 
 def add_overlays(frame, joint_positions, aspect_ratio_scaled):
     # Add joint markers
-    frame = add_joint_markers(frame, joint_positions)
+    frame = add_joint_markers(frame, joint_positions, aspect_ratio_scaled)
 
     # Add the real-world coordinate system as an overlay
     frame = add_coordinate_overlay(frame, aspect_ratio_scaled)
@@ -166,7 +181,7 @@ def add_overlays(frame, joint_positions, aspect_ratio_scaled):
 
 import pandas as pd
 
-def extract_data(cropped_frame, filename, df):
+def extract_data(cropped_frame, filename):
     # Convert the cropped frame to HSV color space
     hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
 
@@ -192,14 +207,10 @@ def extract_data(cropped_frame, filename, df):
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:4]
     # Find center of mass of each contour as tuple of ints
     joints = [tuple(map(int, np.mean(contour, axis=0)[0])) for contour in contours]
-    # # Visualize centers
-    # for center in joints:
-    #     cv2.circle(cropped_frame, tuple(map(int, center)), 3, (0, 0, 255), -1)
 
     # Visualize the contours 
     cropped_frame = cv2.drawContours(cropped_frame, contours, -1, (255, 0, 0), 3)
 
-    closest_points = {}
     # Define a helper function to calculate the distance between two points
     def distance(p1, p2):
         return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
@@ -218,47 +229,14 @@ def extract_data(cropped_frame, filename, df):
             joints.remove(joint_positions[joint_labels[i-1]])
             joint_positions[label] = min(joints, key=lambda p: distance(p, joint_positions[joint_labels[i-1]]))
 
-    # Print the results
-    print(joint_positions)
-    closest_points = joint_positions
-
-    # # Find the closest contour point to the previous joint position for each joint
-    # distances = []
-    # for contour in contours:
-    #     for point in contour:
-    #         point = tuple(point[0])
-    #         distances.append((cv2.pointPolygonTest(contour, joint1, True), point))
-    #         distances.append((cv2.pointPolygonTest(contour, joint2, True), point))
-    #         distances.append((cv2.pointPolygonTest(contour, joint3, True), point))
-    #         distances.append((cv2.pointPolygonTest(contour, end_effector, True), point))
-
-    # closest_points = {}
-    # for joint in ["Joint1", "Joint2", "Joint3", "EndEffector"]:
-    #     # prev_joint = "Origin" if joint == "Joint1" else joint[:-1] + str(int(joint[-1]) - 1)
-    #     prev_joint = "Origin" if joint == "Joint1" else joint[:-1] + str(int(joint[-1]) - 1) if joint[-1].isdigit() else ""
-    #     prev_joint_pos = closest_points[prev_joint] if prev_joint in closest_points else (0, 205)
-    #     closest_points[joint] = min(distances, key=lambda x: abs(x[0]) if x[1] not in closest_points.values() else float('inf'))[1]
-    #     closest_points[joint] = tuple([int(x) for x in closest_points[joint]])
-    #     closest_points[joint] = tuple(map(sum, zip(closest_points[joint], prev_joint_pos)))
-    
-    # # Visualize the closest points
-    # for joint in closest_points:
-    #     cropped_frame = cv2.circle(cropped_frame, closest_points[joint], 5, (255, 0,0), -1)
-    #     cropped_frame = cv2.putText(cropped_frame, joint, (closest_points[joint][0] + 10, closest_points[joint][1] + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-
     # Create a Pandas dataframe to store the joint position data
     servo_angles = filename.split("_")
     servo1_angle = servo_angles[1]
     servo2_angle = servo_angles[3]
     servo3_angle = servo_angles[5].split(".")[0]
-    data = {"Video Filename": filename, "Servo1 Angle": servo1_angle, "Servo2 Angle": servo2_angle, "Servo3 Angle": servo3_angle, "Joint1 Position": str(closest_points["Joint1"]), "Joint2 Position": str(closest_points["Joint2"]), "Joint3 Position": str(closest_points["Joint3"]), "EndEffector Position": str(closest_points["EndEffector"])}
-    new_row = pd.DataFrame(data, index=[0])
+    data = {"Video Filename": filename, "Servo1 Angle": servo1_angle, "Servo2 Angle": servo2_angle, "Servo3 Angle": servo3_angle, "Joint1 Position": str(joint_positions["Joint1"]), "Joint2 Position": str(joint_positions["Joint2"]), "Joint3 Position": str(joint_positions["Joint3"]), "EndEffector Position": str(joint_positions["EndEffector"])}
 
-    # print("df", df)
-    # Append the new row to the global dataframe
-    # df = df.append(new_row, ignore_index=True)
-
-    return df, closest_points, cropped_frame
+    return data, joint_positions, cropped_frame
 
 # Define the function to process the video
 def process_video(filename, df):
@@ -285,7 +263,6 @@ def process_video(filename, df):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(out_filename, fourcc, 30.0, (aspect_ratio_scaled[0], aspect_ratio_scaled[1]))
 
-    joint_positions = {}
     # Loop through all the frames in the video
     for frame_num in range(num_frames):
         # Read the next frame from the video
@@ -296,20 +273,24 @@ def process_video(filename, df):
 
         # Crop the frame
         cropped_frame = crop_frame(frame, aspect_ratio_scaled)
-        # if frame_num == 0:
-        #     print("First frame")
-        df, joint_positions, cropped_frame = extract_data(cropped_frame, filename, df)
-        if frame_num == 0:
-            print(joint_positions)
+        data, joint_positions, cropped_frame = extract_data(cropped_frame, filename)
         overlayed_frame = add_overlays(cropped_frame, joint_positions, aspect_ratio_scaled)
         final_frame = overlayed_frame
+        if frame_num == 200:
+            print("Final frame")
+            new_row = pd.DataFrame(data, index=[0])
+            # Append the new row to the global dataframe
+            df = df.append(new_row, ignore_index=True)
+            # Save an image of the frame
+            cv2.imwrite(os.path.join(output_dir, f"{filename.split('.')[0]}_final_frame.jpg"), final_frame)
+        
         # Write the frame to the output video file
         out.write(final_frame)
 
     # Release the video file and output video file
     cap.release()
     out.release()
-    return df, joint_positions
+    return df
 
 def sort_by_file_order(file_list):
     # Sort the file list in place based on the order they were taken
@@ -325,14 +306,14 @@ def sort_by_file_order(file_list):
 
 df = pd.DataFrame(columns=["Video Filename", "Servo1 Angle", "Servo2 Angle", "Servo3 Angle", "Joint1 Position", "Joint2 Position", "Joint3 Position", "EndEffector Position"])
 # Loop through all the videos in the directory
-joint_positions = {}
+# joint_positions = {}
 for filename in sort_by_file_order(os.listdir(input_dir)):
         # Crop the video
         print("Preprocessing:", filename)
         df = process_video(filename, df)
 
 # Save the dataframe to a CSV file
-# df.to_csv("data.csv", index=False)
+df.to_csv("data.csv", index=False)
 print("All done.")
 cv2.destroyAllWindows()
 
