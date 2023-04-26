@@ -1,0 +1,17 @@
+NEW
+Top Right: (118, 61)
+Bottom Right: (100, 476)
+Top Left: (444, 51)
+Bottom Left: (460, 476)
+
+FROM DATACOLLECTION ROUND 1
+
+Top Right: 130,56
+Bottom Right: 114,466
+Top Left: 456,44
+Bottom Left: 470,474
+
+EndEffector: 286,184
+Joint3: 249,199
+Joint2: 164,212
+Joint1: 77,202
