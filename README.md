@@ -18,6 +18,20 @@ limbX
     └── vision.py - uses ml to process camera data
 ```
 
+### Machine Learning
+# CONTROLLER FOR CONTINUOUS ROBOTIC LIMB
+
+1. Given a desired (x,y) position, use the inverse neural network to predict an initial set of angles (z1,z2,z3) that will result in the robot reaching that position.
+
+2. Use the forward neural network to predict the actual (x',y') position the robot will reach using the initial set of angles.
+
+3. Calculate the error between the desired (x,y) position and the actual (x',y') position.
+
+4. Adjust the initial set of angles using an optimization algorithm (such as gradient descent) to minimize the error between the desired and actual positions.
+
+6. Repeat until the error is minimized to an acceptable threshold.
+
+
 ### Open Questions
 
 - Currently all state information is stored in classes.py and passed down via mmain.py- should we use globals instead?
