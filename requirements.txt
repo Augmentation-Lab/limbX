@@ -2,3 +2,9 @@ pyyaml
 adafruit-circuitpython-servokit
 pyperclip
 sympy
+torch
+torch.nn
+torch.optim
+numpy
+csv
+matplotlib.pyplot
